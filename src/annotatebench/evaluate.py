@@ -8,14 +8,10 @@ from .core import LearningCurve
 def pareto_frontier(
     points: List[Tuple[float, float]]
 ) -> List[Tuple[float, float]]:
-    """Return Pareto-optimal (cost, f1) points: minimize cost, maximize f1.
-
-    A point dominates another if it has <= cost AND >= f1 (strictly better in at least one).
-    """
+    """Return Pareto-optimal (cost, f1) points: minimize cost, maximize f1."""
     if not points:
         return []
 
-    # Sort by cost ascending, then f1 descending
     sorted_pts = sorted(points, key=lambda p: (p[0], -p[1]))
 
     pareto: List[Tuple[float, float]] = []
@@ -46,14 +42,9 @@ def area_under_learning_curve(
 def cost_to_target_f1(
     curve: LearningCurve, target_f1: float
 ) -> Optional[float]:
-    """Return the interpolated cost at which F1 first reaches target_f1.
-
-    Uses linear interpolation between consecutive curve points.
-    Returns None if target is never reached.
-    """
+    """Return the interpolated cost at which F1 first reaches target_f1."""
     pts = sorted(curve.points, key=lambda p: p.budget)
 
-    # Check if any point meets the target
     for i, pt in enumerate(pts):
         if pt.f1 >= target_f1:
             if i == 0:
@@ -61,7 +52,6 @@ def cost_to_target_f1(
             prev = pts[i - 1]
             if prev.f1 >= target_f1:
                 return prev.cost_usd
-            # Linear interpolation on f1 vs cost
             t = (target_f1 - prev.f1) / max(pt.f1 - prev.f1, 1e-12)
             return prev.cost_usd + t * (pt.cost_usd - prev.cost_usd)
 
@@ -72,8 +62,6 @@ def strategy_comparison(
     curves: List[LearningCurve],
 ) -> Dict[str, Dict]:
     """Compare strategies: {strategy_name: {best_f1, total_cost, auc, efficiency}}."""
-    from .core import BUDGET_LEVELS, area_under_learning_curve
-
     result: Dict[str, Dict] = {}
     for curve in curves:
         strategy_name = curve.config.strategy.value
