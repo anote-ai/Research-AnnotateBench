@@ -5,6 +5,8 @@ from .core import (
     ExperimentConfig,
     LearningCurvePoint,
     LearningCurve,
+    CostModel,
+    UncertaintySamplingMetrics,
     fit_learning_curve,
     predict_f1,
 )
@@ -14,6 +16,8 @@ from .evaluate import (
     cost_to_target_f1,
     strategy_comparison,
     budget_recommendation,
+    cost_efficiency_curve,
+    annotation_roi,
 )
 from .data import STRATEGY_F1_CURVES, make_learning_curve, make_full_dataset
 
@@ -24,6 +28,8 @@ __all__ = [
     "ExperimentConfig",
     "LearningCurvePoint",
     "LearningCurve",
+    "CostModel",
+    "UncertaintySamplingMetrics",
     "fit_learning_curve",
     "predict_f1",
     "pareto_frontier",
@@ -31,6 +37,8 @@ __all__ = [
     "cost_to_target_f1",
     "strategy_comparison",
     "budget_recommendation",
+    "cost_efficiency_curve",
+    "annotation_roi",
     "STRATEGY_F1_CURVES",
     "make_learning_curve",
     "make_full_dataset",
