@@ -61,6 +61,16 @@ class LearningCurve:
             return 0.0
         return max(pt.f1 for pt in self.points)
 
+    def best_point(self) -> Optional[LearningCurvePoint]:
+        """Return the point with the highest F1 score.
+
+        If multiple points share the same F1, the lower-budget point is
+        preferred because it reaches the same quality with fewer annotations.
+        """
+        if not self.points:
+            return None
+        return max(self.points, key=lambda pt: (pt.f1, -pt.budget))
+
     def total_cost(self) -> float:
         return sum(pt.cost_usd for pt in self.points)
 

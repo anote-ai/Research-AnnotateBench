@@ -26,6 +26,17 @@ For each strategy, we plot cost vs. best F1 and compute the Pareto frontier — 
 
 Key finding: LLM Annotator dominates at low budgets (<100 samples); Hybrid AL leads at high budgets.
 
+## Usage
+
+```python
+from annotatebench import AnnotationStrategy, NLPTask, make_learning_curve
+
+curve = make_learning_curve(AnnotationStrategy.HYBRID_AL, NLPTask.CLASSIFICATION)
+best = curve.best_point()
+
+print(best.budget, best.f1)
+```
+
 ## Venue
 
 Submitted to **JDSE 2026** — Journal of Data Science and Engineering.
