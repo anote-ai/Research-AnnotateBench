@@ -1,6 +1,5 @@
 """Tests for annotatebench.core."""
 
-import math
 import pytest
 from annotatebench.core import (
     AnnotationStrategy,
