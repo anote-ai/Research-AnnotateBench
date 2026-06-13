@@ -58,6 +58,32 @@ def test_learning_curve_max_f1():
     assert abs(curve.max_f1() - 0.85) < 1e-9
 
 
+def test_learning_curve_best_point():
+    curve = _make_curve([0.5, 0.6, 0.7, 0.8, 0.85])
+    best = curve.best_point()
+    assert best is not None
+    assert best.budget == 1000
+    assert abs(best.f1 - 0.85) < 1e-9
+
+
+def test_learning_curve_best_point_prefers_lower_budget_tie():
+    curve = _make_curve([0.5, 0.6, 0.85, 0.8, 0.85])
+    best = curve.best_point()
+    assert best is not None
+    assert best.budget == 250
+
+
+def test_learning_curve_best_point_empty_curve():
+    config = ExperimentConfig(
+        strategy=AnnotationStrategy.RANDOM,
+        task=NLPTask.CLASSIFICATION,
+        budget=1000,
+        model_type="bert-base",
+        dataset_name="test",
+    )
+    assert LearningCurve(config=config, points=[]).best_point() is None
+
+
 def test_learning_curve_total_cost():
     curve = _make_curve()
     expected = sum(b * 0.1 for b in BUDGET_LEVELS)
