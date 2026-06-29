@@ -4,7 +4,7 @@
 
 ## Benchmark Grid
 
-5 strategies × 5 tasks × 5 budget levels = 25 learning curves, 125 data points.
+The synthetic demo covers 5 strategies × 5 tasks × 5 budget levels = 25 learning curves, 125 data points. The real pilot path currently supports text classification train/test CSVs with gold labels.
 
 | Strategy         | 50   | 100  | 250  | 500  | 1000 |
 |------------------|------|------|------|------|------|
@@ -24,7 +24,7 @@ F1 scores are modeled as power laws: `F1 = a * budget^b`, fit via log-linear reg
 
 For each strategy, we plot cost vs. best F1 and compute the Pareto frontier — strategies that cannot be strictly dominated in both dimensions. This guides practitioners to cost-efficient annotation choices.
 
-Key finding: LLM Annotator dominates at low budgets (<100 samples); Hybrid AL leads at high budgets.
+Synthetic demo finding: LLM Annotator dominates at low budgets (<100 samples); Hybrid AL leads at high budgets. This should be replaced with pilot results before the paper draft treats it as evidence.
 
 ## Usage
 
@@ -35,6 +35,44 @@ curve = make_learning_curve(AnnotationStrategy.HYBRID_AL, NLPTask.CLASSIFICATION
 best = curve.best_point()
 
 print(best.budget, best.f1)
+```
+
+Run a real text-classification pilot from CSV files:
+
+```bash
+./scripts/run_pilot.py \
+  --train-csv data/financial_phrasebank_train.csv \
+  --test-csv data/financial_phrasebank_test.csv \
+  --text-column text \
+  --label-column label \
+  --dataset-name financial_phrasebank \
+  --budgets 50,100,250,500,1000
+```
+
+The pilot trains TF-IDF + logistic-regression classifiers at each budget and compares random sampling, uncertainty active learning, diversity active learning, and hybrid active learning using the same learning-curve and Pareto utilities as the synthetic demo.
+
+Run the Financial PhraseBank pilot from a local public PhraseBank file:
+
+```bash
+./scripts/run_pilot.py \
+  --dataset financial_phrasebank \
+  --financial-phrasebank-path data/raw/FinancialPhraseBank-v1.0.zip \
+  --budgets 50,100,250,500,1000 \
+  --seeds 0,1,2 \
+  --cost-scenarios low,base,high \
+  --output-csv results/pilot_results.csv
+./scripts/make_figures.py --results results/pilot_results.csv --cost-scenario base
+```
+
+The Financial PhraseBank loader accepts CSV files with `text`/`label` or `sentence`/`label` columns, the original `sentence@label` text files, or a ZIP containing the original PhraseBank sentence files. The first paper draft is in `paper/main.tex`.
+
+Run budget recommendations across available pilot CSVs:
+
+```bash
+./scripts/make_budget_recommendations.py \
+  --results results/pilot_results.csv results/pilot_results_trec.csv results/pilot_results_banking77.csv \
+  --output-csv results/budget_recommendations.csv \
+  --cost-scenario base
 ```
 
 ## Venue
