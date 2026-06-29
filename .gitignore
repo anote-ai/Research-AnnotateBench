@@ -5,3 +5,10 @@ __pycache__/
 dist/
 build/
 *.egg-info/
+.DS_Store
+.Rhistory
+data/raw/
+*.aux
+*.log
+*.out
+*.toc
