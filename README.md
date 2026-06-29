@@ -75,6 +75,17 @@ Run budget recommendations across available pilot CSVs:
   --cost-scenario base
 ```
 
+## Usage
+
+```python
+from annotatebench import AnnotationStrategy, NLPTask, make_learning_curve
+
+curve = make_learning_curve(AnnotationStrategy.HYBRID_AL, NLPTask.CLASSIFICATION)
+best = curve.best_point()
+
+print(best.budget, best.f1)
+```
+
 ## Venue
 
 Submitted to **JDSE 2026** — Journal of Data Science and Engineering.
