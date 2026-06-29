@@ -20,6 +20,20 @@ from .evaluate import (
     annotation_roi,
 )
 from .data import STRATEGY_F1_CURVES, make_learning_curve, make_full_dataset
+from .costs import COST_SCENARIOS, CostScenario, estimate_annotation_cost, get_cost_scenarios
+from .pilot import (
+    TextClassificationDataset,
+    load_text_classification_csv,
+    run_text_classification_pilot,
+    run_text_classification_pilot_table,
+    select_budget_indices,
+)
+from .datasets import (
+    FINANCIAL_PHRASEBANK_LABELS,
+    load_financial_phrasebank,
+    load_trec,
+    load_banking77,
+)
 
 __all__ = [
     "AnnotationStrategy",
@@ -42,4 +56,17 @@ __all__ = [
     "STRATEGY_F1_CURVES",
     "make_learning_curve",
     "make_full_dataset",
+    "COST_SCENARIOS",
+    "CostScenario",
+    "estimate_annotation_cost",
+    "get_cost_scenarios",
+    "TextClassificationDataset",
+    "load_text_classification_csv",
+    "run_text_classification_pilot",
+    "run_text_classification_pilot_table",
+    "select_budget_indices",
+    "FINANCIAL_PHRASEBANK_LABELS",
+    "load_financial_phrasebank",
+    "load_trec",
+    "load_banking77",
 ]
