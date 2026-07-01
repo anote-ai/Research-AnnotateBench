@@ -20,6 +20,8 @@ from .evaluate import (
     annotation_roi,
 )
 from .data import STRATEGY_F1_CURVES, make_learning_curve, make_full_dataset
+from .metrics import calibration_score, expected_calibration_error, lari_score
+from .taxonomy import FailureCategory, FailureCode, summarize_failure_codes
 
 __all__ = [
     "AnnotationStrategy",
@@ -42,4 +44,10 @@ __all__ = [
     "STRATEGY_F1_CURVES",
     "make_learning_curve",
     "make_full_dataset",
+    "calibration_score",
+    "expected_calibration_error",
+    "lari_score",
+    "FailureCategory",
+    "FailureCode",
+    "summarize_failure_codes",
 ]
