@@ -38,3 +38,29 @@ def test_budget_levels_match():
     curve = make_learning_curve(AnnotationStrategy.HYBRID_AL, NLPTask.NER)
     budgets = [pt.budget for pt in curve.points]
     assert budgets == BUDGET_LEVELS
+
+
+def test_non_classification_task_curves_do_not_fall_back_to_classification():
+    for task in (NLPTask.QA, NLPTask.SUMMARIZATION, NLPTask.INSTRUCTION_TUNING):
+        for strategy in AnnotationStrategy:
+            classification_curve = make_learning_curve(
+                strategy,
+                NLPTask.CLASSIFICATION,
+                noise=0.0,
+                seed=0,
+            )
+            task_curve = make_learning_curve(strategy, task, noise=0.0, seed=0)
+
+            classification_f1s = [pt.f1 for pt in classification_curve.points]
+            task_f1s = [pt.f1 for pt in task_curve.points]
+
+            assert task_f1s != classification_f1s
+
+
+def test_non_classification_task_curves_are_monotonic_without_noise():
+    for task in (NLPTask.QA, NLPTask.SUMMARIZATION, NLPTask.INSTRUCTION_TUNING):
+        for strategy in AnnotationStrategy:
+            curve = make_learning_curve(strategy, task, noise=0.0, seed=0)
+            f1s = [pt.f1 for pt in curve.points]
+
+            assert f1s == sorted(f1s)

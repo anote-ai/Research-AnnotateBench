@@ -18,6 +18,9 @@
 Annotation budgets are a practical bottleneck in applied natural language processing, yet teams often choose labeling strategies without direct evidence about expected accuracy gains, diminishing returns, or cost tradeoffs. We introduce AnnotateBench, a benchmark framework for comparing annotation strategies through downstream learning curves, cost-performance frontiers, and budget recommendations. The current JDSE 2026 rough draft reports an initial pilot using public gold-labeled datasets rather than newly collected human annotations. In the pilot, annotation is simulated by revealing labels from the training split according to each selection strategy. We compare random sampling, uncertainty-based active learning, diversity-based active learning, and a hybrid strategy across Financial PhraseBank, TREC, and Banking77 using a common TF-IDF logistic-regression classifier. The intended contribution is not a final leaderboard, but a reproducible empirical scaffold for measuring how many labeled examples are needed to reach strong downstream performance under different annotation strategies.
 \end{abstract}
 
+\paragraph{Scope note.}
+This manuscript is a pilot paper for annotation strategy selection. It is not yet the full LLM annotation reliability benchmark described in the repository design document. In particular, the current empirical results do not include real LLM annotation calls with confidence scores, calibration analysis, LARI heatmaps, human failure-taxonomy coding, or a review-rate optimizer.
+
 \section{Introduction}
 
 Labeled data remains one of the most expensive inputs to real-world NLP systems. Even when model architectures and training code are standardized, teams still need to decide which examples to annotate, how large an initial labeling batch should be, and when further annotation is no longer worth the marginal cost. These decisions are often made using rules of thumb or isolated active-learning experiments rather than a benchmark that directly compares annotation strategies under a shared budget and evaluation protocol.
@@ -244,6 +247,9 @@ The next manuscript milestone is to strengthen the current three-dataset pilot. 
   \item run more seeds and report confidence intervals;
   \item calibrate human annotation and LLM annotation cost assumptions against external pricing sources;
   \item decide whether the LLM annotator baseline is a noisy-label simulator, a zero-shot prompted model, or deferred entirely;
+  \item run a measured LLM annotation reliability pilot with confidence scores so ECE and LARI can be reported from real outputs;
+  \item code a sample of incorrect LLM annotations using the failure taxonomy and report inter-rater agreement;
+  \item prototype a review-rate threshold policy only after measured LARI/confidence data exists;
   \item compare against at least one stronger downstream learner;
   \item run ablations on active-learning warm-start size and representation choice.
 \end{itemize}

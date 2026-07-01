@@ -34,6 +34,8 @@ from .datasets import (
     load_trec,
     load_banking77,
 )
+from .metrics import calibration_score, expected_calibration_error, lari_score
+from .taxonomy import FailureCategory, FailureCode, summarize_failure_codes
 
 __all__ = [
     "AnnotationStrategy",
@@ -69,4 +71,10 @@ __all__ = [
     "load_financial_phrasebank",
     "load_trec",
     "load_banking77",
+    "calibration_score",
+    "expected_calibration_error",
+    "lari_score",
+    "FailureCategory",
+    "FailureCode",
+    "summarize_failure_codes",
 ]

@@ -2,6 +2,21 @@
 
 **Motivation:** Annotation budget is a primary constraint in NLP system development. This benchmark systematically compares annotation strategies across tasks and budgets using learning curves.
 
+## Current Status
+
+This repository is not yet the full LLM annotation reliability benchmark described in
+`DESIGN_DOC.md`. The current code supports:
+
+- illustrative synthetic learning curves for exercising cost and Pareto utilities;
+- a real public-dataset text-classification pilot that simulates annotation by revealing gold
+  labels under budgeted selection strategies;
+- small ECE/LARI metric primitives and failure-taxonomy data structures for the future
+  reliability track.
+
+It does not yet contain real LLM annotation runs with confidence scores, human adjudication,
+failure-taxonomy coding, or a review-rate optimizer. See `BLOG.md`, `PAPER_DRAFT.md`, and
+`results/README.md` for the claim boundary.
+
 ## Benchmark Grid
 
 The synthetic demo covers 5 strategies × 5 tasks × 5 budget levels = 25 learning curves, 125 data points. The real pilot path currently supports text classification train/test CSVs with gold labels.
@@ -24,9 +39,9 @@ F1 scores are modeled as power laws: `F1 = a * budget^b`, fit via log-linear reg
 
 For each strategy, we plot cost vs. best F1 and compute the Pareto frontier — strategies that cannot be strictly dominated in both dimensions. This guides practitioners to cost-efficient annotation choices.
 
-Synthetic demo finding: LLM Annotator dominates at low budgets (<100 samples); Hybrid AL leads at high budgets. This should be replaced with pilot results before the paper draft treats it as evidence.
+Synthetic demo finding: LLM Annotator dominates at low budgets (<100 samples); Hybrid AL leads at high budgets. This is an illustrative reference-curve pattern, not a measured empirical finding.
 
-## Usage
+## Synthetic Demo Usage
 
 ```python
 from annotatebench import AnnotationStrategy, NLPTask, make_learning_curve
@@ -75,20 +90,10 @@ Run budget recommendations across available pilot CSVs:
   --cost-scenario base
 ```
 
-## Usage
-
-```python
-from annotatebench import AnnotationStrategy, NLPTask, make_learning_curve
-
-curve = make_learning_curve(AnnotationStrategy.HYBRID_AL, NLPTask.CLASSIFICATION)
-best = curve.best_point()
-
-print(best.budget, best.f1)
-```
-
 ## Venue
 
-Submitted to **JDSE 2026** — Journal of Data Science and Engineering.
+Rough **JDSE 2026** draft materials are in `paper/main.tex`; the project is not submission-ready
+for the full `DESIGN_DOC.md` reliability claims.
 
 ## Citation
 
