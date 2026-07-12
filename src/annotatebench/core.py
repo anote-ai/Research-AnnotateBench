@@ -19,6 +19,7 @@ class NLPTask(str, Enum):
     NER = "ner"
     QA = "qa"
     SUMMARIZATION = "summarization"
+    RELATION_EXTRACTION = "relation_extraction"
     INSTRUCTION_TUNING = "instruction_tuning"
 
 
