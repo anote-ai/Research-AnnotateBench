@@ -40,6 +40,8 @@ from .structured_metrics import (
     relation_macro_f1,
     rouge_l_f1,
 )
+from .metrics import calibration_score, expected_calibration_error, lari_score
+from .taxonomy import FailureCategory, FailureCode, summarize_failure_codes
 
 __all__ = [
     "AnnotationStrategy",
@@ -78,4 +80,10 @@ __all__ = [
     "qa_token_f1",
     "relation_macro_f1",
     "rouge_l_f1",
+    "calibration_score",
+    "expected_calibration_error",
+    "lari_score",
+    "FailureCategory",
+    "FailureCode",
+    "summarize_failure_codes",
 ]
