@@ -20,6 +20,26 @@ from .evaluate import (
     annotation_roi,
 )
 from .data import STRATEGY_F1_CURVES, make_learning_curve, make_full_dataset
+from .structured import (
+    NERDataset,
+    NERExample,
+    QADataset,
+    QAExample,
+    RelationExtractionDataset,
+    RelationExtractionExample,
+    SummarizationDataset,
+    SummarizationExample,
+)
+from .structured_metrics import (
+    bio_tags_to_spans,
+    entity_level_f1,
+    mean_rouge_l_f1,
+    qa_exact_match,
+    qa_scores,
+    qa_token_f1,
+    relation_macro_f1,
+    rouge_l_f1,
+)
 
 __all__ = [
     "AnnotationStrategy",
@@ -42,4 +62,20 @@ __all__ = [
     "STRATEGY_F1_CURVES",
     "make_learning_curve",
     "make_full_dataset",
+    "NERDataset",
+    "NERExample",
+    "QADataset",
+    "QAExample",
+    "RelationExtractionDataset",
+    "RelationExtractionExample",
+    "SummarizationDataset",
+    "SummarizationExample",
+    "bio_tags_to_spans",
+    "entity_level_f1",
+    "mean_rouge_l_f1",
+    "qa_exact_match",
+    "qa_scores",
+    "qa_token_f1",
+    "relation_macro_f1",
+    "rouge_l_f1",
 ]
