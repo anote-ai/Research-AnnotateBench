@@ -114,6 +114,9 @@ def test_run_text_classification_pilot_table_columns():
         "macro_f1",
         "accuracy",
         "cost_scenario",
+        "cost_source",
+        "cost_source_url",
+        "cost_checked_at",
         "human_cost_per_label",
         "selection_cost_per_example",
         "annotation_cost",
@@ -122,6 +125,7 @@ def test_run_text_classification_pilot_table_columns():
     ]
     assert len(results) == 3
     assert sorted(results["cost_scenario"].tolist()) == ["base", "high", "low"]
+    assert set(results["cost_checked_at"].tolist()) == {"2026-07-12"}
 
 
 def test_run_text_classification_pilot_table_can_select_cost_scenarios():

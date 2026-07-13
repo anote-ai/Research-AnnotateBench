@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 import zipfile
 from pathlib import Path
 from urllib.request import urlopen
@@ -24,6 +25,31 @@ BANKING77_TRAIN_URL = (
 BANKING77_TEST_URL = (
     "https://raw.githubusercontent.com/PolyAI-LDN/task-specific-datasets/master/banking_data/test.csv"
 )
+DEFAULT_MAX_TRAIN_EXAMPLES = 1200
+DEFAULT_MAX_TEST_EXAMPLES = 1000
+BENCHMARK_DATASETS = [
+    "financial_phrasebank",
+    "trec",
+    "banking77",
+    "ag_news",
+    "sst2",
+    "twenty_newsgroups",
+    "rotten_tomatoes",
+    "yelp_polarity",
+    "tweet_eval_sentiment",
+    "emotion",
+]
+
+
+@dataclass(frozen=True)
+class HuggingFaceTextDatasetConfig:
+    name: str
+    dataset_id: str
+    config_name: str | None = None
+    train_split: str = "train"
+    test_split: str = "test"
+    text_columns: tuple[str, ...] = ("text",)
+    label_column: str = "label"
 
 
 def load_financial_phrasebank(
@@ -93,6 +119,155 @@ def load_banking77(*args, **kwargs) -> TextClassificationDataset:
         train_url=kwargs.pop("train_url", BANKING77_TRAIN_URL),
         test_url=kwargs.pop("test_url", BANKING77_TEST_URL),
         **kwargs,
+    )
+
+
+def load_ag_news(**kwargs) -> TextClassificationDataset:
+    return _load_huggingface_text_classification(
+        HuggingFaceTextDatasetConfig("ag_news", "fancyzhx/ag_news"),
+        **kwargs,
+    )
+
+
+def load_dbpedia_14(**kwargs) -> TextClassificationDataset:
+    return _load_huggingface_text_classification(
+        HuggingFaceTextDatasetConfig(
+            "dbpedia_14",
+            "fancyzhx/dbpedia_14",
+            text_columns=("title", "content"),
+        ),
+        **kwargs,
+    )
+
+
+def load_sst2(**kwargs) -> TextClassificationDataset:
+    return _load_huggingface_text_classification(
+        HuggingFaceTextDatasetConfig("sst2", "SetFit/sst2"),
+        **kwargs,
+    )
+
+
+def load_imdb(**kwargs) -> TextClassificationDataset:
+    return _load_huggingface_text_classification(
+        HuggingFaceTextDatasetConfig("imdb", "stanfordnlp/imdb"),
+        **kwargs,
+    )
+
+
+def load_rotten_tomatoes(**kwargs) -> TextClassificationDataset:
+    return _load_huggingface_text_classification(
+        HuggingFaceTextDatasetConfig("rotten_tomatoes", "cornell-movie-review-data/rotten_tomatoes"),
+        **kwargs,
+    )
+
+
+def load_yelp_polarity(**kwargs) -> TextClassificationDataset:
+    return _load_huggingface_text_classification(
+        HuggingFaceTextDatasetConfig("yelp_polarity", "fancyzhx/yelp_polarity"),
+        **kwargs,
+    )
+
+
+def load_tweet_eval_sentiment(**kwargs) -> TextClassificationDataset:
+    return _load_huggingface_text_classification(
+        HuggingFaceTextDatasetConfig("tweet_eval_sentiment", "cardiffnlp/tweet_eval", config_name="sentiment"),
+        **kwargs,
+    )
+
+
+def load_emotion(**kwargs) -> TextClassificationDataset:
+    return _load_huggingface_text_classification(
+        HuggingFaceTextDatasetConfig("emotion", "dair-ai/emotion"),
+        **kwargs,
+    )
+
+
+def load_twenty_newsgroups(
+    *,
+    seed: int = 42,
+    max_train_examples: int | None = DEFAULT_MAX_TRAIN_EXAMPLES,
+    max_test_examples: int | None = DEFAULT_MAX_TEST_EXAMPLES,
+) -> TextClassificationDataset:
+    return _load_huggingface_text_classification(
+        HuggingFaceTextDatasetConfig("twenty_newsgroups", "SetFit/20_newsgroups"),
+        seed=seed,
+        max_train_examples=max_train_examples,
+        max_test_examples=max_test_examples,
+    )
+
+
+def load_benchmark_dataset(
+    name: str,
+    *,
+    seed: int = 42,
+    max_train_examples: int | None = DEFAULT_MAX_TRAIN_EXAMPLES,
+    max_test_examples: int | None = DEFAULT_MAX_TEST_EXAMPLES,
+    financial_phrasebank_path: str | Path | None = None,
+    trec_train_path: str | Path | None = None,
+    trec_test_path: str | Path | None = None,
+    banking77_train_path: str | Path | None = None,
+    banking77_test_path: str | Path | None = None,
+    download: bool = False,
+) -> TextClassificationDataset:
+    """Load one of the ten text-classification benchmark datasets."""
+    if name == "financial_phrasebank":
+        dataset = load_financial_phrasebank(financial_phrasebank_path, seed=seed, download=download)
+    elif name == "trec":
+        dataset = load_trec(trec_train_path, trec_test_path, download=download)
+    elif name == "banking77":
+        dataset = load_banking77(banking77_train_path, banking77_test_path, download=download)
+    elif name == "ag_news":
+        return load_ag_news(seed=seed, max_train_examples=max_train_examples, max_test_examples=max_test_examples)
+    elif name == "dbpedia_14":
+        return load_dbpedia_14(seed=seed, max_train_examples=max_train_examples, max_test_examples=max_test_examples)
+    elif name == "sst2":
+        return load_sst2(seed=seed, max_train_examples=max_train_examples, max_test_examples=max_test_examples)
+    elif name == "twenty_newsgroups":
+        return load_twenty_newsgroups(
+            seed=seed,
+            max_train_examples=max_train_examples,
+            max_test_examples=max_test_examples,
+        )
+    elif name == "imdb":
+        return load_imdb(seed=seed, max_train_examples=max_train_examples, max_test_examples=max_test_examples)
+    elif name == "rotten_tomatoes":
+        return load_rotten_tomatoes(
+            seed=seed,
+            max_train_examples=max_train_examples,
+            max_test_examples=max_test_examples,
+        )
+    elif name == "yelp_polarity":
+        return load_yelp_polarity(seed=seed, max_train_examples=max_train_examples, max_test_examples=max_test_examples)
+    elif name == "tweet_eval_sentiment":
+        return load_tweet_eval_sentiment(
+            seed=seed,
+            max_train_examples=max_train_examples,
+            max_test_examples=max_test_examples,
+        )
+    elif name == "emotion":
+        return load_emotion(seed=seed, max_train_examples=max_train_examples, max_test_examples=max_test_examples)
+    else:
+        raise ValueError(f"Unknown benchmark dataset: {name}")
+
+    train_texts, train_labels = _cap_examples(
+        dataset.train_texts,
+        dataset.train_labels,
+        max_train_examples,
+        seed,
+    )
+    test_texts, test_labels = _cap_examples(
+        dataset.test_texts,
+        dataset.test_labels,
+        max_test_examples,
+        seed,
+    )
+    return TextClassificationDataset(
+        name=dataset.name,
+        train_texts=train_texts,
+        train_labels=train_labels,
+        test_texts=test_texts,
+        test_labels=test_labels,
+        label_names=dataset.label_names,
     )
 
 
@@ -201,6 +376,114 @@ def _normalize_public_label(value: object, label_mapping: dict[int, str] | None)
             return str(value).strip()
         return label_mapping.get(numeric_value, str(value).strip())
     return str(value).strip()
+
+
+def _load_huggingface_text_classification(
+    config: HuggingFaceTextDatasetConfig,
+    *,
+    seed: int = 42,
+    max_train_examples: int | None = DEFAULT_MAX_TRAIN_EXAMPLES,
+    max_test_examples: int | None = DEFAULT_MAX_TEST_EXAMPLES,
+) -> TextClassificationDataset:
+    try:
+        from datasets import ClassLabel, load_dataset
+    except ImportError as exc:
+        raise RuntimeError("Install the 'datasets' package to load HuggingFace benchmarks.") from exc
+
+    dataset_args = (config.dataset_id,) if config.config_name is None else (config.dataset_id, config.config_name)
+    train_split = load_dataset(*dataset_args, split=config.train_split, streaming=True)
+    try:
+        test_split = load_dataset(*dataset_args, split=config.test_split, streaming=True)
+    except ValueError:
+        test_split = load_dataset(*dataset_args, split="validation", streaming=True)
+
+    label_feature = train_split.features.get(config.label_column)
+    label_names = list(label_feature.names) if isinstance(label_feature, ClassLabel) else None
+
+    train_split = _shuffle_and_take_hf_split(train_split, max_train_examples, seed)
+    test_split = _shuffle_and_take_hf_split(test_split, max_test_examples, seed)
+    train_texts, train_labels = _hf_texts_and_labels(
+        train_split,
+        config.text_columns,
+        config.label_column,
+        label_names,
+    )
+    test_texts, test_labels = _hf_texts_and_labels(
+        test_split,
+        config.text_columns,
+        config.label_column,
+        label_names,
+    )
+    return TextClassificationDataset(
+        name=config.name,
+        train_texts=train_texts,
+        train_labels=train_labels,
+        test_texts=test_texts,
+        test_labels=test_labels,
+        label_names=label_names,
+    )
+
+
+def _shuffle_and_take_hf_split(split: object, max_examples: int | None, seed: int) -> object:
+    if max_examples is None:
+        return split
+    if hasattr(split, "shuffle"):
+        split = split.shuffle(buffer_size=10_000, seed=seed)
+    if hasattr(split, "take"):
+        split = split.take(max_examples)
+    return split
+
+
+def _hf_texts_and_labels(
+    split: object,
+    text_columns: tuple[str, ...],
+    label_column: str,
+    label_names: list[str] | None,
+) -> tuple[list[str], list[str]]:
+    texts: list[str] = []
+    labels: list[str] = []
+    for row in split:
+        parts = [str(row[column]).strip() for column in text_columns if str(row[column]).strip()]
+        if not parts:
+            continue
+        texts.append(" ".join(parts))
+        labels.append(_normalize_hf_label(row[label_column], label_names))
+    if not texts:
+        raise ValueError("HuggingFace split did not contain any usable text rows.")
+    return texts, labels
+
+
+def _normalize_hf_label(value: object, label_names: list[str] | None) -> str:
+    if label_names is not None:
+        try:
+            return label_names[int(value)]
+        except (TypeError, ValueError, IndexError):
+            pass
+    return str(value).strip()
+
+
+def _cap_examples(
+    texts: list[str],
+    labels: list[str],
+    max_examples: int | None,
+    seed: int,
+) -> tuple[list[str], list[str]]:
+    if max_examples is None or len(texts) <= max_examples:
+        return list(texts), list(labels)
+    stratify = labels if _can_stratify(labels, max_examples) else None
+    sampled_texts, _, sampled_labels, _ = train_test_split(
+        texts,
+        labels,
+        train_size=max_examples,
+        random_state=seed,
+        stratify=stratify,
+    )
+    return list(sampled_texts), list(sampled_labels)
+
+
+def _can_stratify(labels: list[str], max_examples: int) -> bool:
+    counts = pd.Series(labels).value_counts()
+    return bool(not counts.empty and counts.min() >= 2 and len(counts) <= max_examples)
 
 
 def _read_phrasebank_source(path: Path) -> tuple[list[str], list[str]]:

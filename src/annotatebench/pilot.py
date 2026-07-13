@@ -169,6 +169,9 @@ def run_text_classification_pilot_table(
                             "macro_f1": macro_f1,
                             "accuracy": accuracy,
                             "cost_scenario": scenario.name,
+                            "cost_source": scenario.source_name,
+                            "cost_source_url": scenario.source_url,
+                            "cost_checked_at": scenario.checked_at,
                             "human_cost_per_label": scenario.human_cost_per_label,
                             "selection_cost_per_example": (
                                 scenario.selection_cost_per_example.get(strategy, 0.0)
@@ -257,6 +260,42 @@ def _fit_and_score_metrics(
     return (
         float(f1_score(dataset.test_labels, predictions, average="macro")),
         float(accuracy_score(dataset.test_labels, predictions)),
+    )
+
+
+def fit_and_score_text_classifier(
+    train_texts: Sequence[str],
+    train_labels: Sequence[str],
+    test_texts: Sequence[str],
+    test_labels: Sequence[str],
+    seed: int,
+) -> tuple[float, float]:
+    """Train the shared text classifier on supplied labels and score on gold test labels."""
+    if not train_texts:
+        raise ValueError("At least one training example is required.")
+    if len(train_texts) != len(train_labels):
+        raise ValueError("Training texts and labels must have the same length.")
+    if len(test_texts) != len(test_labels):
+        raise ValueError("Test texts and labels must have the same length.")
+
+    if len(set(train_labels)) < 2:
+        model = DummyClassifier(strategy="most_frequent")
+    else:
+        model = Pipeline(
+            [
+                ("tfidf", TfidfVectorizer(min_df=1, ngram_range=(1, 2))),
+                (
+                    "clf",
+                    LogisticRegression(max_iter=1000, random_state=seed),
+                ),
+            ]
+        )
+
+    model.fit(list(train_texts), list(train_labels))
+    predictions = model.predict(list(test_texts))
+    return (
+        float(f1_score(list(test_labels), predictions, average="macro")),
+        float(accuracy_score(list(test_labels), predictions)),
     )
 
 

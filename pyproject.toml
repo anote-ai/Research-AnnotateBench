@@ -15,6 +15,7 @@ dependencies = [
     "matplotlib",
     "rich",
     "tqdm",
+    "datasets",
 ]
 
 [tool.setuptools.packages.find]

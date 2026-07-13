@@ -6,7 +6,17 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from annotatebench.datasets import load_banking77, load_financial_phrasebank, load_trec
+import pytest
+
+from annotatebench.datasets import (
+    BENCHMARK_DATASETS,
+    _cap_examples,
+    _normalize_hf_label,
+    load_banking77,
+    load_benchmark_dataset,
+    load_financial_phrasebank,
+    load_trec,
+)
 
 
 def test_load_financial_phrasebank_from_original_text(tmp_path):
@@ -79,3 +89,33 @@ def test_load_banking77_from_local_splits(tmp_path):
     assert dataset.name == "banking77"
     assert dataset.train_labels == ["cash_withdrawal", "card_arrival"]
     assert dataset.test_labels == ["cash_withdrawal"]
+
+
+def test_benchmark_registry_has_ten_unique_datasets():
+    assert len(BENCHMARK_DATASETS) == 10
+    assert len(set(BENCHMARK_DATASETS)) == 10
+    assert "financial_phrasebank" in BENCHMARK_DATASETS
+    assert "twenty_newsgroups" in BENCHMARK_DATASETS
+
+
+def test_cap_examples_is_reproducible_and_stratified():
+    texts = [f"text {idx}" for idx in range(12)]
+    labels = ["a"] * 6 + ["b"] * 6
+
+    capped_texts, capped_labels = _cap_examples(texts, labels, max_examples=6, seed=3)
+    capped_texts_again, capped_labels_again = _cap_examples(texts, labels, max_examples=6, seed=3)
+
+    assert capped_texts == capped_texts_again
+    assert capped_labels == capped_labels_again
+    assert len(capped_texts) == 6
+    assert set(capped_labels) == {"a", "b"}
+
+
+def test_normalize_hf_label_uses_class_names():
+    assert _normalize_hf_label(1, ["negative", "positive"]) == "positive"
+    assert _normalize_hf_label("custom", None) == "custom"
+
+
+def test_load_benchmark_dataset_rejects_unknown_name():
+    with pytest.raises(ValueError, match="Unknown benchmark dataset"):
+        load_benchmark_dataset("not_a_dataset")
