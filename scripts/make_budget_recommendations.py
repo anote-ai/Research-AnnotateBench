@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Create budget recommendation tables from pilot CSV results."""
+"""Create budget recommendation tables from benchmark CSV results."""
 from __future__ import annotations
 
 import argparse
@@ -10,7 +10,7 @@ import pandas as pd
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--results", nargs="+", default=["results/pilot_results.csv"])
+    parser.add_argument("--results", nargs="+", default=["results/benchmark_results.csv"])
     parser.add_argument("--output-csv", default="results/budget_recommendations.csv")
     parser.add_argument("--targets", default="0.50,0.60,0.70,0.75,0.80")
     parser.add_argument("--cost-scenario", default="base")

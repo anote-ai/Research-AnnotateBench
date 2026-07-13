@@ -222,6 +222,7 @@ def test_run_llm_strategy_benchmark_dry_run_writes_llm_rows(tmp_path):
     assert row["strategy"] == "llm_annotator"
     assert row["dataset"] == "financial_phrasebank"
     assert row["budget"] == "2"
+    assert row["downstream_model"] == "tfidf_logreg"
     assert "llm_lari" in row
     assert list(annotation_dir.glob("*.csv"))
 

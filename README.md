@@ -36,6 +36,10 @@ active learning. Annotation is simulated by revealing existing gold labels from 
 The `llm_annotator` strategy instead labels selected training examples with an OpenAI model and
 trains the same downstream classifier on those model-generated labels.
 
+The benchmark runners also support an optional `sentence_transformer_logreg` downstream model for
+robustness checks. This path requires installing the optional `sentence-transformers` package and
+is intended for separate comparison CSVs rather than overwriting the measured TF-IDF benchmark.
+
 ## Pareto Analysis
 
 For each strategy, we plot cost vs. best F1 and compute the Pareto frontier -- strategies that cannot be strictly dominated in both dimensions. This guides practitioners to cost-efficient annotation choices.
@@ -123,9 +127,26 @@ Run the 10-dataset text-classification benchmark:
   --banking77-test-path data/raw/banking77_test.csv \
   --output-csv results/benchmark_results.csv
 ./scripts/make_figures.py --results results/benchmark_results.csv --cost-scenario base
+./scripts/make_paper_summary_table.py \
+  --results results/benchmark_results.csv \
+  --output-csv results/paper_core_summary.csv \
+  --cost-scenario base
 ```
 
 The benchmark runner uses HuggingFace datasets for AG News, SST-2, 20 Newsgroups, Rotten Tomatoes, Yelp Polarity, TweetEval Sentiment, and Emotion. Large datasets are capped by default to keep active-learning experiments tractable. DBpedia-14 and IMDb remain available as optional heavier loaders, but are not part of the default 10-dataset run.
+
+Run the optional embedding-model robustness check after installing `sentence-transformers`:
+
+```bash
+./scripts/run_benchmark.py \
+  --financial-phrasebank-path data/raw/FinancialPhraseBank-v1.0.zip \
+  --trec-train-path data/raw/trec_train.csv \
+  --trec-test-path data/raw/trec_test.csv \
+  --banking77-train-path data/raw/banking77_train.csv \
+  --banking77-test-path data/raw/banking77_test.csv \
+  --downstream-model sentence_transformer_logreg \
+  --output-csv results/benchmark_results_sentence_transformer_logreg.csv
+```
 
 Run budget recommendations across available benchmark CSVs:
 
@@ -142,6 +163,7 @@ dataset, budget, seed, and cost scenario:
 ```bash
 ./scripts/make_llm_strategy_summary.py \
   --llm-results results/benchmark_results_with_llm_seed0_all_datasets.csv \
+  --seeds 0 \
   --output-csv results/llm_strategy_seed0_summary.csv
 ```
 
@@ -187,6 +209,15 @@ OPENAI_API_KEY=... python scripts/run_llm_strategy_benchmark.py \
   --budgets 50,100,250 \
   --seeds 0,1,2 \
   --output-csv results/benchmark_results_with_llm.csv
+```
+
+After a multi-seed LLM run finishes, summarize all completed seeds together:
+
+```bash
+./scripts/make_llm_strategy_summary.py \
+  --llm-results results/benchmark_results_with_llm.csv \
+  --seeds 0,1,2 \
+  --output-csv results/llm_strategy_summary.csv
 ```
 
 For API cost estimates, pass dated token prices explicitly with

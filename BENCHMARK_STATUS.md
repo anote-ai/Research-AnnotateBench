@@ -11,6 +11,7 @@
   - `results/benchmark_best_overall.csv`
   - `results/benchmark_best_by_strategy.csv`
   - `results/budget_recommendations.csv`
+  - `results/paper_core_summary.csv`
 
 ## Validation
 
@@ -24,7 +25,22 @@ Run:
 Current status:
 
 - Benchmark validation passed.
-- Test suite passed with 83 tests.
+- Test suite passed with 101 tests.
+
+## Downstream model robustness status
+
+Implemented:
+
+- The default measured benchmark remains TF-IDF + logistic regression.
+- `scripts/run_benchmark.py`, `scripts/run_pilot.py`, and
+  `scripts/run_llm_strategy_benchmark.py` accept `--downstream-model`.
+- `sentence_transformer_logreg` is available as an optional robustness path when the
+  `sentence-transformers` package and model weights are installed locally.
+
+Still not claimed as complete:
+
+- The sentence-transformer downstream comparison has not been run as a measured result in this
+  repository snapshot.
 
 ## LLM annotator strategy status
 

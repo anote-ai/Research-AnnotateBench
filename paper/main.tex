@@ -149,13 +149,14 @@ The expected benchmark artifacts are:
   \item \texttt{results/benchmark\_results.csv}: combined ten-dataset gold-label classification benchmark results.
   \item \texttt{results/benchmark\_results\_with\_llm.csv}: API-backed LLM annotator strategy rows when the LLM benchmark runner is executed.
   \item \texttt{results/benchmark\_best\_overall.csv} and \texttt{results/benchmark\_best\_by\_strategy.csv}: compact summary tables derived from the base cost scenario.
+  \item \texttt{results/paper\_core\_summary.csv}: paper-ready best strategy-budget table generated from the row-level benchmark results.
   \item \texttt{results/budget\_recommendations.csv}: cheapest strategy-budget pairs for target macro F1 thresholds under the base cost scenario.
   \item \texttt{figures/learning\_curve\_*.png} and \texttt{figures/pareto\_*.png}: learning curves and base-scenario cost frontiers generated from the public gold-label reveal simulation results for each benchmark dataset.
 \end{itemize}
 
 \section{Preliminary Results}
 
-The current benchmark uses three strategy-selection seeds, 0, 1, and 2. The combined output contains 1,800 measured rows: ten datasets, four selection strategies, five label budgets, three seeds, and three cost scenarios. Table~\ref{tab:benchmark-results} summarizes the best strategy-budget point for each dataset under the base cost scenario. The ranking varies by dataset: random sampling is strongest on AG News, Banking77, and 20 Newsgroups; uncertainty sampling is strongest on Financial PhraseBank and SST-2; and the hybrid strategy is strongest on Emotion, Rotten Tomatoes, TREC, TweetEval Sentiment, and Yelp Polarity.
+The current benchmark uses three strategy-selection seeds, 0, 1, and 2. The combined output contains 1,800 measured rows: ten datasets, four selection strategies, five label budgets, three seeds, and three cost scenarios. Table~\ref{tab:benchmark-results} summarizes the best strategy-budget point for each dataset under the base cost scenario. The ranking varies by dataset: random sampling is strongest on Banking77 and 20 Newsgroups; uncertainty sampling is strongest on Financial PhraseBank and SST-2; and the hybrid strategy is strongest on AG News, Emotion, Rotten Tomatoes, TREC, TweetEval Sentiment, and Yelp Polarity.
 
 \begin{table}[h]
 \centering
@@ -165,7 +166,7 @@ The current benchmark uses three strategy-selection seeds, 0, 1, and 2. The comb
 \toprule
 Dataset & Best strategy & Macro F1 & Budget & Base cost \\
 \midrule
-AG News & Random & 0.818 $\pm$ 0.004 & 1000 & \$95.20 \\
+AG News & Hybrid AL & 0.790 $\pm$ 0.012 & 1000 & \$99.20 \\
 Banking77 & Random & 0.545 $\pm$ 0.004 & 1000 & \$95.20 \\
 Emotion & Hybrid AL & 0.233 $\pm$ 0.007 & 1000 & \$99.20 \\
 Financial PhraseBank & Uncertainty AL & 0.757 $\pm$ 0.016 & 500 & \$48.60 \\

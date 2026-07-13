@@ -23,6 +23,14 @@ from .core import (
 )
 from .costs import CostScenario, estimate_annotation_cost, get_cost_scenarios
 
+DOWNSTREAM_MODEL_TFIDF_LOGREG = "tfidf_logreg"
+DOWNSTREAM_MODEL_SENTENCE_TRANSFORMER_LOGREG = "sentence_transformer_logreg"
+DEFAULT_SENTENCE_TRANSFORMER_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+SUPPORTED_DOWNSTREAM_MODELS = {
+    DOWNSTREAM_MODEL_TFIDF_LOGREG,
+    DOWNSTREAM_MODEL_SENTENCE_TRANSFORMER_LOGREG,
+}
+
 
 @dataclass(frozen=True)
 class TextClassificationDataset:
@@ -68,6 +76,8 @@ def run_text_classification_pilot(
     seed: int = 42,
     cost_per_sample: float = 0.10,
     cost_scenario: CostScenario | None = None,
+    downstream_model: str = DOWNSTREAM_MODEL_TFIDF_LOGREG,
+    sentence_transformer_model: str = DEFAULT_SENTENCE_TRANSFORMER_MODEL,
 ) -> List[LearningCurve]:
     """Run budgeted text-classification experiments on a gold-labeled split."""
     if not dataset.train_texts or not dataset.test_texts:
@@ -98,7 +108,13 @@ def run_text_classification_pilot(
                 strategy=strategy,
                 seed=seed,
             )
-            f1 = _fit_and_score(dataset, selected, seed=seed)
+            f1 = _fit_and_score(
+                dataset,
+                selected,
+                seed=seed,
+                downstream_model=downstream_model,
+                sentence_transformer_model=sentence_transformer_model,
+            )
             points.append(
                 LearningCurvePoint(
                     budget=min(budget, len(dataset.train_texts)),
@@ -115,7 +131,7 @@ def run_text_classification_pilot(
             strategy=strategy,
             task=NLPTask.CLASSIFICATION,
             budget=max(pt.budget for pt in points),
-            model_type="tfidf-logreg",
+            model_type=downstream_model,
             dataset_name=dataset.name,
         )
         curves.append(LearningCurve(config=config, points=points))
@@ -130,6 +146,8 @@ def run_text_classification_pilot_table(
     seeds: Sequence[int] = (42,),
     cost_per_sample: float = 0.10,
     cost_scenarios: Sequence[str] | None = None,
+    downstream_model: str = DOWNSTREAM_MODEL_TFIDF_LOGREG,
+    sentence_transformer_model: str = DEFAULT_SENTENCE_TRANSFORMER_MODEL,
 ) -> pd.DataFrame:
     """Run pilot experiments and return one result row per condition."""
     rows: list[dict[str, object]] = []
@@ -152,7 +170,13 @@ def run_text_classification_pilot_table(
                     strategy=strategy,
                     seed=seed,
                 )
-                macro_f1, accuracy = _fit_and_score_metrics(dataset, selected, seed=seed)
+                macro_f1, accuracy = _fit_and_score_metrics(
+                    dataset,
+                    selected,
+                    seed=seed,
+                    downstream_model=downstream_model,
+                    sentence_transformer_model=sentence_transformer_model,
+                )
                 actual_budget = len(selected)
                 for scenario in active_cost_scenarios:
                     annotation_cost, selection_cost, total_cost = estimate_annotation_cost(
@@ -166,6 +190,12 @@ def run_text_classification_pilot_table(
                             "strategy": strategy.value,
                             "budget": actual_budget,
                             "seed": seed,
+                            "downstream_model": downstream_model,
+                            "embedding_model": (
+                                sentence_transformer_model
+                                if downstream_model == DOWNSTREAM_MODEL_SENTENCE_TRANSFORMER_LOGREG
+                                else ""
+                            ),
                             "macro_f1": macro_f1,
                             "accuracy": accuracy,
                             "cost_scenario": scenario.name,
@@ -229,8 +259,16 @@ def _fit_and_score(
     dataset: TextClassificationDataset,
     selected_indices: Sequence[int],
     seed: int,
+    downstream_model: str = DOWNSTREAM_MODEL_TFIDF_LOGREG,
+    sentence_transformer_model: str = DEFAULT_SENTENCE_TRANSFORMER_MODEL,
 ) -> float:
-    macro_f1, _ = _fit_and_score_metrics(dataset, selected_indices, seed)
+    macro_f1, _ = _fit_and_score_metrics(
+        dataset,
+        selected_indices,
+        seed,
+        downstream_model=downstream_model,
+        sentence_transformer_model=sentence_transformer_model,
+    )
     return macro_f1
 
 
@@ -238,28 +276,19 @@ def _fit_and_score_metrics(
     dataset: TextClassificationDataset,
     selected_indices: Sequence[int],
     seed: int,
+    downstream_model: str = DOWNSTREAM_MODEL_TFIDF_LOGREG,
+    sentence_transformer_model: str = DEFAULT_SENTENCE_TRANSFORMER_MODEL,
 ) -> tuple[float, float]:
     selected_texts = [dataset.train_texts[i] for i in selected_indices]
     selected_labels = [dataset.train_labels[i] for i in selected_indices]
-
-    if len(set(selected_labels)) < 2:
-        model = DummyClassifier(strategy="most_frequent")
-    else:
-        model = Pipeline(
-            [
-                ("tfidf", TfidfVectorizer(min_df=1, ngram_range=(1, 2))),
-                (
-                    "clf",
-                    LogisticRegression(max_iter=1000, random_state=seed),
-                ),
-            ]
-        )
-
-    model.fit(selected_texts, selected_labels)
-    predictions = model.predict(dataset.test_texts)
-    return (
-        float(f1_score(dataset.test_labels, predictions, average="macro")),
-        float(accuracy_score(dataset.test_labels, predictions)),
+    return fit_and_score_text_classifier(
+        selected_texts,
+        selected_labels,
+        dataset.test_texts,
+        dataset.test_labels,
+        seed=seed,
+        downstream_model=downstream_model,
+        sentence_transformer_model=sentence_transformer_model,
     )
 
 
@@ -269,6 +298,8 @@ def fit_and_score_text_classifier(
     test_texts: Sequence[str],
     test_labels: Sequence[str],
     seed: int,
+    downstream_model: str = DOWNSTREAM_MODEL_TFIDF_LOGREG,
+    sentence_transformer_model: str = DEFAULT_SENTENCE_TRANSFORMER_MODEL,
 ) -> tuple[float, float]:
     """Train the shared text classifier on supplied labels and score on gold test labels."""
     if not train_texts:
@@ -278,25 +309,73 @@ def fit_and_score_text_classifier(
     if len(test_texts) != len(test_labels):
         raise ValueError("Test texts and labels must have the same length.")
 
-    if len(set(train_labels)) < 2:
-        model = DummyClassifier(strategy="most_frequent")
-    else:
-        model = Pipeline(
-            [
-                ("tfidf", TfidfVectorizer(min_df=1, ngram_range=(1, 2))),
-                (
-                    "clf",
-                    LogisticRegression(max_iter=1000, random_state=seed),
-                ),
-            ]
+    if downstream_model not in SUPPORTED_DOWNSTREAM_MODELS:
+        raise ValueError(
+            f"Unsupported downstream model: {downstream_model}. "
+            f"Choose one of {sorted(SUPPORTED_DOWNSTREAM_MODELS)}."
         )
 
-    model.fit(list(train_texts), list(train_labels))
-    predictions = model.predict(list(test_texts))
+    if len(set(train_labels)) < 2:
+        model = DummyClassifier(strategy="most_frequent")
+        model.fit(list(train_texts), list(train_labels))
+        predictions = model.predict(list(test_texts))
+    elif downstream_model == DOWNSTREAM_MODEL_TFIDF_LOGREG:
+        predictions = _predict_tfidf_logreg(train_texts, train_labels, test_texts, seed)
+    else:
+        predictions = _predict_sentence_transformer_logreg(
+            train_texts,
+            train_labels,
+            test_texts,
+            seed,
+            sentence_transformer_model,
+        )
+
     return (
         float(f1_score(list(test_labels), predictions, average="macro")),
         float(accuracy_score(list(test_labels), predictions)),
     )
+
+
+def _predict_tfidf_logreg(
+    train_texts: Sequence[str],
+    train_labels: Sequence[str],
+    test_texts: Sequence[str],
+    seed: int,
+) -> np.ndarray:
+    model = Pipeline(
+        [
+            ("tfidf", TfidfVectorizer(min_df=1, ngram_range=(1, 2))),
+            (
+                "clf",
+                LogisticRegression(max_iter=1000, random_state=seed),
+            ),
+        ]
+    )
+    model.fit(list(train_texts), list(train_labels))
+    return model.predict(list(test_texts))
+
+
+def _predict_sentence_transformer_logreg(
+    train_texts: Sequence[str],
+    train_labels: Sequence[str],
+    test_texts: Sequence[str],
+    seed: int,
+    sentence_transformer_model: str,
+) -> np.ndarray:
+    try:
+        from sentence_transformers import SentenceTransformer
+    except ImportError as exc:
+        raise ImportError(
+            "The sentence_transformer_logreg downstream model requires the optional "
+            "`sentence-transformers` package. Install it before running this comparison."
+        ) from exc
+
+    encoder = SentenceTransformer(sentence_transformer_model)
+    train_vectors = encoder.encode(list(train_texts), show_progress_bar=False)
+    test_vectors = encoder.encode(list(test_texts), show_progress_bar=False)
+    model = LogisticRegression(max_iter=1000, random_state=seed)
+    model.fit(train_vectors, list(train_labels))
+    return model.predict(test_vectors)
 
 
 def _diversity_indices(texts: Sequence[str], budget: int, seed: int) -> List[int]:

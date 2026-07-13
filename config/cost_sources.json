@@ -1,0 +1,62 @@
+{
+  "checked_at": "2026-07-12",
+  "human_annotation_sources": [
+    {
+      "name": "Amazon Mechanical Turk",
+      "url": "https://www.mturk.com/pricing",
+      "unit": "worker reward plus requester fee",
+      "formula": "hourly_reward_usd * seconds_per_label / 3600 * (1 + platform_fee_rate) * redundancy",
+      "default_scenario": "low",
+      "assumptions": {
+        "hourly_reward_usd": 8.0,
+        "seconds_per_label": 15,
+        "platform_fee_rate": 0.2,
+        "redundancy": 1
+      },
+      "notes": "MTurk requester pricing is public, but worker reward is requester-selected. This scenario models a low-cost single-rater short text-classification task."
+    },
+    {
+      "name": "Prolific",
+      "url": "https://www.prolific.com/pricing",
+      "unit": "participant reward plus platform fee",
+      "formula": "hourly_reward_usd * seconds_per_label / 3600 * (1 + platform_fee_rate) * redundancy",
+      "default_scenario": "base",
+      "assumptions": {
+        "hourly_reward_usd": 12.0,
+        "seconds_per_label": 20,
+        "platform_fee_rate": 0.428,
+        "redundancy": 1
+      },
+      "notes": "Base scenario uses Prolific recommended participant pay for a short single-rater text-classification task."
+    },
+    {
+      "name": "Prolific",
+      "url": "https://www.prolific.com/pricing",
+      "unit": "participant reward plus platform fee",
+      "formula": "hourly_reward_usd * seconds_per_label / 3600 * (1 + platform_fee_rate) * redundancy",
+      "default_scenario": "high",
+      "assumptions": {
+        "hourly_reward_usd": 18.0,
+        "seconds_per_label": 30,
+        "platform_fee_rate": 0.428,
+        "redundancy": 2
+      },
+      "notes": "High scenario models slower examples, higher participant pay, and two independent labels."
+    }
+  ],
+  "llm_api_sources": [
+    {
+      "name": "OpenAI API pricing",
+      "url": "https://openai.com/api/pricing/",
+      "unit": "USD per 1M input and output tokens",
+      "formula": "input_tokens * input_usd_per_million_tokens / 1000000 + output_tokens * output_usd_per_million_tokens / 1000000",
+      "notes": "Keep model prices in experiment metadata when running API-backed annotation. The repository can estimate token-based costs without storing an API key."
+    }
+  ],
+  "excluded_primary_sources": [
+    {
+      "name": "Managed annotation vendors",
+      "reason": "Many managed services use quote-based pricing, so they are documented qualitatively unless a dated quote is available."
+    }
+  ]
+}

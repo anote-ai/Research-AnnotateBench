@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate learning-curve and Pareto figures from pilot CSV results."""
+"""Generate learning-curve and Pareto figures from benchmark CSV results."""
 from __future__ import annotations
 
 import argparse
@@ -22,7 +22,7 @@ from annotatebench.evaluate import pareto_frontier
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--results", default="results/pilot_results.csv")
+    parser.add_argument("--results", default="results/benchmark_results.csv")
     parser.add_argument("--figures-dir", default="figures")
     parser.add_argument("--cost-scenario", default="base")
     return parser.parse_args()
@@ -51,6 +51,7 @@ def make_figures(
     written: list[Path] = []
     for dataset, dataset_df in df.groupby("dataset"):
         slug = str(dataset).replace(" ", "_").lower()
+        title_context = _title_context(dataset_df)
         summary = (
             dataset_df
             .groupby(["strategy", "budget"], as_index=False)
@@ -61,12 +62,24 @@ def make_figures(
             )
         )
         summary["macro_f1_std"] = summary["macro_f1_std"].fillna(0.0)
-        written.append(_plot_learning_curve(summary, slug, output_dir))
-        written.append(_plot_pareto(summary, slug, output_dir))
+        written.append(_plot_learning_curve(summary, slug, output_dir, title_context))
+        written.append(_plot_pareto(summary, slug, output_dir, title_context))
     return written
 
 
-def _plot_learning_curve(df: pd.DataFrame, dataset_slug: str, output_dir: Path) -> Path:
+def _title_context(df: pd.DataFrame) -> str:
+    strategies = set(df["strategy"].dropna().astype(str))
+    if strategies == {"llm_annotator"}:
+        return "LLM annotator seed-0 benchmark"
+    return "gold-label reveal simulation"
+
+
+def _plot_learning_curve(
+    df: pd.DataFrame,
+    dataset_slug: str,
+    output_dir: Path,
+    title_context: str,
+) -> Path:
     fig, ax = plt.subplots(figsize=(7, 4.5))
     for strategy, strategy_df in df.groupby("strategy"):
         ordered = strategy_df.sort_values("budget")
@@ -81,7 +94,7 @@ def _plot_learning_curve(df: pd.DataFrame, dataset_slug: str, output_dir: Path) 
         )
     ax.set_xlabel("Number of labeled examples")
     ax.set_ylabel("Macro F1")
-    ax.set_title(f"Learning curves: {dataset_slug}")
+    ax.set_title(f"Learning curves: {dataset_slug} {title_context}")
     ax.set_ylim(0, 1)
     ax.grid(True, alpha=0.25)
     ax.legend(fontsize=8)
@@ -92,7 +105,12 @@ def _plot_learning_curve(df: pd.DataFrame, dataset_slug: str, output_dir: Path) 
     return output
 
 
-def _plot_pareto(df: pd.DataFrame, dataset_slug: str, output_dir: Path) -> Path:
+def _plot_pareto(
+    df: pd.DataFrame,
+    dataset_slug: str,
+    output_dir: Path,
+    title_context: str,
+) -> Path:
     fig, ax = plt.subplots(figsize=(7, 4.5))
     for strategy, strategy_df in df.groupby("strategy"):
         ax.scatter(strategy_df["total_cost"], strategy_df["macro_f1"], label=strategy, s=36)
@@ -111,7 +129,7 @@ def _plot_pareto(df: pd.DataFrame, dataset_slug: str, output_dir: Path) -> Path:
         ax.plot(costs, f1s, color="black", linewidth=1.5, label="Pareto frontier")
     ax.set_xlabel("Estimated annotation cost (USD)")
     ax.set_ylabel("Macro F1")
-    ax.set_title(f"Cost-performance frontier: {dataset_slug}")
+    ax.set_title(f"Cost-performance frontier: {dataset_slug} {title_context}")
     ax.set_ylim(0, 1)
     ax.grid(True, alpha=0.25)
     ax.legend(fontsize=8)
