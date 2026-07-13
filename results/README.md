@@ -19,13 +19,14 @@ The row-level `benchmark_results.csv` currently contains the full measured gold-
 `budget_recommendations.csv`, and `paper_core_summary.csv` are derived from the same ten-dataset
 benchmark outputs.
 
-`benchmark_results_with_llm.csv` is the intended output for the API-backed `llm_annotator`
-strategy. It is generated separately by `scripts/run_llm_strategy_benchmark.py` after
+`benchmark_results_with_llm.csv` is the default output path for new API-backed `llm_annotator`
+strategy runs. It is generated separately by `scripts/run_llm_strategy_benchmark.py` after
 `OPENAI_API_KEY` is set in the terminal.
 
-`benchmark_results_with_llm_seed0_all_datasets.csv` contains the current ten-dataset seed-0
-LLM annotator grid for budgets 50, 100, and 250. `llm_strategy_seed0_summary.csv` compares those
-rows against the best matching gold-label strategy from `benchmark_results.csv`.
+`benchmark_results_with_llm_seed0_all_datasets.csv` contains the current paper-referenced
+ten-dataset seed-0 LLM annotator grid for budgets 50, 100, and 250.
+`llm_strategy_seed0_summary.csv` compares those rows against the best matching gold-label
+strategy from `benchmark_results.csv`.
 
 The older `pilot_results*.csv` files are retained as per-dataset pilot outputs for the original
 three-dataset run. Prefer `benchmark_results.csv` for paper tables and figures.

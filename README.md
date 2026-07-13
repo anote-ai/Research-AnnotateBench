@@ -2,6 +2,15 @@
 
 **Motivation:** Annotation budget is a primary constraint in NLP system development. This benchmark systematically compares annotation strategies across public text-classification datasets and label budgets using learning curves.
 
+## Submission Entrypoints
+
+- **Paper source:** [`paper/main.tex`](paper/main.tex)
+- **Research blog post:** [`BLOG.md`](BLOG.md)
+- **Benchmark status:** [`BENCHMARK_STATUS.md`](BENCHMARK_STATUS.md)
+- **Result inventory:** [`results/README.md`](results/README.md)
+- **Primary measured results:** [`results/benchmark_results.csv`](results/benchmark_results.csv)
+- **Paper-ready summary table:** [`results/paper_core_summary.csv`](results/paper_core_summary.csv)
+
 ## Current Status
 
 This repository is not the full LLM annotation reliability benchmark described in
@@ -12,7 +21,8 @@ This repository is not the full LLM annotation reliability benchmark described i
   labels under budgeted selection strategies across ten classification datasets;
 - an API-backed `llm_annotator` strategy path that asks an OpenAI model to label selected
   training examples, trains the same downstream classifier on those labels, and writes
-  benchmark-style rows;
+  benchmark-style rows; the current measured LLM artifact is a seed-0 ten-dataset run at budgets
+  50, 100, and 250;
 - small ECE/LARI metric primitives and failure-taxonomy data structures for LLM annotation
   diagnostics.
 
@@ -22,7 +32,12 @@ for the claim boundary.
 
 ## Benchmark Grid
 
-The measured benchmark covers 10 public text-classification datasets x 5 annotation strategies across budget levels. Four strategies reveal existing gold labels under different selection policies; the fifth strategy, `llm_annotator`, labels selected training examples with an OpenAI model and trains the same downstream classifier on those model-generated labels.
+The primary measured gold-label benchmark covers 10 public text-classification datasets x 4
+selection strategies x 5 label budgets x 3 seeds x 3 cost scenarios. The optional
+`llm_annotator` strategy is measured separately in the current seed-0 artifact for budgets 50,
+100, and 250. Four strategies reveal existing gold labels under different selection policies; the
+LLM strategy labels selected training examples with an OpenAI model and trains the same downstream
+classifier on those model-generated labels.
 
 **Measured datasets:** Financial PhraseBank, TREC, Banking77, AG News, SST-2, 20 Newsgroups, Rotten Tomatoes, Yelp Polarity, TweetEval Sentiment, and Emotion.
 
@@ -114,7 +129,7 @@ Run the Financial PhraseBank pilot from a local public PhraseBank file:
 ./scripts/make_figures.py --results results/pilot_results.csv --cost-scenario base
 ```
 
-The Financial PhraseBank loader accepts CSV files with `text`/`label` or `sentence`/`label` columns, the original `sentence@label` text files, or a ZIP containing the original PhraseBank sentence files. The first paper draft is in `paper/main.tex`.
+The Financial PhraseBank loader accepts CSV files with `text`/`label` or `sentence`/`label` columns, the original `sentence@label` text files, or a ZIP containing the original PhraseBank sentence files. The pilot paper source is in `paper/main.tex`.
 
 Run the 10-dataset text-classification benchmark:
 
@@ -229,9 +244,9 @@ only when you intentionally want to refresh all annotations.
 
 ## Venue
 
-**JDSE 2026** draft materials are in `paper/main.tex`. The ten-dataset classification
-benchmark artifacts are present; the project is not yet submission-ready for the full
-`DESIGN_DOC.md` LLM reliability claims.
+**JDSE 2026** pilot materials are in `paper/main.tex`. The ten-dataset classification
+benchmark artifacts are present and ready to support the pilot paper; the project does not claim
+the full `DESIGN_DOC.md` LLM reliability benchmark yet.
 
 ## Citation
 
