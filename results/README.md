@@ -13,11 +13,10 @@ benchmark. It simulates annotation by revealing gold labels from public datasets
 downstream classifier, and reports selection-strategy learning curves. These are measured
 classification benchmark outputs, but they are not LLM annotation reliability results.
 
-As of the cost-calibration refresh, the row-level `benchmark_results.csv` may be a partial rerun
-if HuggingFace datasets were unavailable locally. Check dataset coverage before using it for
-figures. The summary files `benchmark_best_overall.csv`, `benchmark_best_by_strategy.csv`, and
-`budget_recommendations.csv` retain the earlier ten-dataset measured scores with recalibrated
-base costs.
+The row-level `benchmark_results.csv` currently contains the full measured gold-label grid:
+10 datasets x 4 selection strategies x 5 label budgets x 3 seeds x 3 cost scenarios, for
+1,800 rows. The summary files `benchmark_best_overall.csv`, `benchmark_best_by_strategy.csv`,
+and `budget_recommendations.csv` are derived from the same ten-dataset benchmark outputs.
 
 `benchmark_results_with_llm.csv` is the intended output for the API-backed `llm_annotator`
 strategy. It is generated separately by `scripts/run_llm_strategy_benchmark.py` after
