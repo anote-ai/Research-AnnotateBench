@@ -20,19 +20,6 @@ It does not yet contain human adjudication, failure-taxonomy coding, a review-ra
 the full cross-model reliability study. See `BLOG.md`, `PAPER_DRAFT.md`, and `results/README.md`
 for the claim boundary.
 
-## Current Status
-
-This repository is not yet the full LLM annotation reliability benchmark described in
-`DESIGN_DOC.md`. The current code supports:
-
-- illustrative synthetic learning curves for exercising cost and Pareto utilities;
-- small ECE/LARI metric primitives and failure-taxonomy data structures for the future
-  reliability track.
-
-It does not yet contain real LLM annotation runs with confidence scores, human adjudication,
-failure-taxonomy coding, or a review-rate optimizer. See `BLOG.md`, `PAPER_DRAFT.md`, and
-`results/README.md` for the claim boundary.
-
 ## Benchmark Grid
 
 The measured benchmark covers 10 public text-classification datasets x 5 annotation strategies across budget levels. Four strategies reveal existing gold labels under different selection policies; the fifth strategy, `llm_annotator`, labels selected training examples with an OpenAI model and trains the same downstream classifier on those model-generated labels.
