@@ -30,7 +30,12 @@ from annotatebench.llm import (
     normalize_annotation,
 )
 from annotatebench.metrics.lari import expected_calibration_error, lari_score
-from annotatebench.pilot import fit_and_score_text_classifier
+from annotatebench.pilot import (
+    DEFAULT_SENTENCE_TRANSFORMER_MODEL,
+    DOWNSTREAM_MODEL_SENTENCE_TRANSFORMER_LOGREG,
+    DOWNSTREAM_MODEL_TFIDF_LOGREG,
+    fit_and_score_text_classifier,
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -48,6 +53,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--banking77-test-path")
     parser.add_argument("--download-data", action="store_true")
     parser.add_argument("--model", default=os.environ.get("OPENAI_MODEL", "gpt-4o-mini"))
+    parser.add_argument(
+        "--downstream-model",
+        choices=[DOWNSTREAM_MODEL_TFIDF_LOGREG, DOWNSTREAM_MODEL_SENTENCE_TRANSFORMER_LOGREG],
+        default=DOWNSTREAM_MODEL_TFIDF_LOGREG,
+    )
+    parser.add_argument("--sentence-transformer-model", default=DEFAULT_SENTENCE_TRANSFORMER_MODEL)
     parser.add_argument("--api-url", default=os.environ.get("OPENAI_API_URL", DEFAULT_API_URL))
     parser.add_argument("--prompt-version", default=GENERIC_PROMPT_VERSION)
     parser.add_argument("--prompt-dir", default="prompts")
@@ -144,6 +155,8 @@ def main() -> None:
                     dataset.test_texts,
                     dataset.test_labels,
                     seed=seed,
+                    downstream_model=args.downstream_model,
+                    sentence_transformer_model=args.sentence_transformer_model,
                 )
                 llm_correctness = [
                     gold == predicted for gold, predicted in zip(selected_gold_labels, predicted_labels)
@@ -163,6 +176,12 @@ def main() -> None:
                             "strategy": AnnotationStrategy.LLM_ANNOTATOR.value,
                             "budget": len(selected),
                             "seed": seed,
+                            "downstream_model": args.downstream_model,
+                            "embedding_model": (
+                                args.sentence_transformer_model
+                                if args.downstream_model == DOWNSTREAM_MODEL_SENTENCE_TRANSFORMER_LOGREG
+                                else ""
+                            ),
                             "macro_f1": macro_f1,
                             "accuracy": accuracy,
                             "cost_scenario": scenario.name,

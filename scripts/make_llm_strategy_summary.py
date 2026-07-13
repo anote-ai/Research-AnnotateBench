@@ -13,32 +13,36 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--gold-results", default="results/benchmark_results.csv")
     parser.add_argument("--llm-results", nargs="+", required=True)
     parser.add_argument("--cost-scenario", default="base")
-    parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument("--seed", type=int, default=None, help="Deprecated alias for a single seed.")
+    parser.add_argument("--seeds", default="0")
     parser.add_argument("--output-csv", default="results/llm_strategy_seed0_summary.csv")
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
+    seeds = [args.seed] if args.seed is not None else [
+        int(value) for value in args.seeds.split(",") if value.strip()
+    ]
     llm = pd.concat([pd.read_csv(path) for path in args.llm_results], ignore_index=True)
-    llm = llm[(llm["cost_scenario"] == args.cost_scenario) & (llm["seed"] == args.seed)].copy()
+    llm = llm[(llm["cost_scenario"] == args.cost_scenario) & (llm["seed"].isin(seeds))].copy()
     if llm.empty:
-        raise SystemExit("No LLM rows matched the requested cost scenario and seed.")
+        raise SystemExit("No LLM rows matched the requested cost scenario and seeds.")
 
     gold = pd.read_csv(args.gold_results)
     gold = gold[
         (gold["cost_scenario"] == args.cost_scenario)
-        & (gold["seed"] == args.seed)
+        & (gold["seed"].isin(seeds))
         & (gold["dataset"].isin(llm["dataset"].unique()))
         & (gold["budget"].isin(llm["budget"].unique()))
     ].copy()
     if gold.empty:
         raise SystemExit("No gold-label rows matched the LLM datasets, budgets, scenario, and seed.")
 
-    best_indices = gold.groupby(["dataset", "budget"])["macro_f1"].idxmax()
+    best_indices = gold.groupby(["dataset", "budget", "seed"])["macro_f1"].idxmax()
     best_gold = gold.loc[
         best_indices,
-        ["dataset", "budget", "strategy", "macro_f1", "accuracy"],
+        ["dataset", "budget", "seed", "strategy", "macro_f1", "accuracy"],
     ].rename(
         columns={
             "strategy": "best_gold_strategy",
@@ -46,7 +50,7 @@ def main() -> None:
             "accuracy": "best_gold_accuracy",
         }
     )
-    summary = llm.merge(best_gold, on=["dataset", "budget"], how="left")
+    summary = llm.merge(best_gold, on=["dataset", "budget", "seed"], how="left")
     summary["macro_f1_gap_vs_best_gold"] = summary["macro_f1"] - summary["best_gold_macro_f1"]
     columns = [
         "dataset",

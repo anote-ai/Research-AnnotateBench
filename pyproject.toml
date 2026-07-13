@@ -18,5 +18,10 @@ dependencies = [
     "datasets",
 ]
 
+[project.optional-dependencies]
+embeddings = [
+    "sentence-transformers",
+]
+
 [tool.setuptools.packages.find]
 where = ["src"]

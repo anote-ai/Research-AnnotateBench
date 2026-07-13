@@ -16,7 +16,8 @@ classification benchmark outputs, but they are not LLM annotation reliability re
 The row-level `benchmark_results.csv` currently contains the full measured gold-label grid:
 10 datasets x 4 selection strategies x 5 label budgets x 3 seeds x 3 cost scenarios, for
 1,800 rows. The summary files `benchmark_best_overall.csv`, `benchmark_best_by_strategy.csv`,
-and `budget_recommendations.csv` are derived from the same ten-dataset benchmark outputs.
+`budget_recommendations.csv`, and `paper_core_summary.csv` are derived from the same ten-dataset
+benchmark outputs.
 
 `benchmark_results_with_llm.csv` is the intended output for the API-backed `llm_annotator`
 strategy. It is generated separately by `scripts/run_llm_strategy_benchmark.py` after
@@ -37,6 +38,8 @@ Current benchmark columns:
 | strategy | selection strategy |
 | budget | number of revealed labels |
 | seed | strategy-selection seed |
+| downstream_model | optional downstream classifier identifier in newly generated comparison CSVs |
+| embedding_model | optional embedding model name when `downstream_model` uses sentence-transformer embeddings |
 | macro_f1 | measured downstream macro F1 |
 | accuracy | measured downstream accuracy |
 | cost_scenario | calibrated low/base/high cost scenario |
@@ -51,6 +54,20 @@ Current benchmark columns:
 
 LLM strategy outputs use the same core columns and may additionally include `llm_label_accuracy`,
 `llm_label_macro_f1`, `llm_ece`, `llm_lari`, `model_name`, and `prompt_version`.
+
+Paper core summary columns:
+
+| column | description |
+|---|---|
+| dataset | public dataset name |
+| best_strategy | strategy with the highest mean macro F1 under the selected cost scenario |
+| best_budget | label budget for that strategy-budget point |
+| mean_macro_f1 | mean macro F1 across strategy-selection seeds |
+| std_macro_f1 | sample standard deviation of macro F1 across seeds |
+| mean_accuracy | mean accuracy across seeds |
+| mean_total_cost | mean estimated cost under the selected cost scenario |
+| n_seeds | number of unique seeds represented |
+| cost_scenario | cost scenario used for the table |
 
 LLM summary columns:
 

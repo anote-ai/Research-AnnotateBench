@@ -8,7 +8,10 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from annotatebench.core import AnnotationStrategy, LearningCurve
 from annotatebench.pilot import (
+    DOWNSTREAM_MODEL_SENTENCE_TRANSFORMER_LOGREG,
+    DOWNSTREAM_MODEL_TFIDF_LOGREG,
     TextClassificationDataset,
+    fit_and_score_text_classifier,
     load_text_classification_csv,
     run_text_classification_pilot,
     run_text_classification_pilot_table,
@@ -111,6 +114,8 @@ def test_run_text_classification_pilot_table_columns():
         "strategy",
         "budget",
         "seed",
+        "downstream_model",
+        "embedding_model",
         "macro_f1",
         "accuracy",
         "cost_scenario",
@@ -124,6 +129,8 @@ def test_run_text_classification_pilot_table_columns():
         "total_cost",
     ]
     assert len(results) == 3
+    assert set(results["downstream_model"].tolist()) == {DOWNSTREAM_MODEL_TFIDF_LOGREG}
+    assert set(results["embedding_model"].tolist()) == {""}
     assert sorted(results["cost_scenario"].tolist()) == ["base", "high", "low"]
     assert set(results["cost_checked_at"].tolist()) == {"2026-07-12"}
 
@@ -153,3 +160,24 @@ def test_budget_larger_than_train_set_uses_all_examples():
     )
 
     assert selected == list(range(len(dataset.train_texts)))
+
+
+def test_sentence_transformer_downstream_model_requires_optional_dependency():
+    dataset = _dataset()
+
+    try:
+        import sentence_transformers  # noqa: F401
+    except ImportError:
+        try:
+            fit_and_score_text_classifier(
+                dataset.train_texts,
+                dataset.train_labels,
+                dataset.test_texts,
+                dataset.test_labels,
+                seed=0,
+                downstream_model=DOWNSTREAM_MODEL_SENTENCE_TRANSFORMER_LOGREG,
+            )
+        except ImportError as exc:
+            assert "sentence-transformers" in str(exc)
+        else:
+            raise AssertionError("Expected missing sentence-transformers dependency to fail.")

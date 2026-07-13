@@ -1,5 +1,13 @@
 # Research Design Document: AnnotateBench
 
+> **Status note:** This document is the long-term research design, not a description of what
+> the repository has already implemented. The current codebase contains a learning-curve /
+> annotation-strategy pilot, illustrative reference curves, and small ECE/LARI/taxonomy
+> primitives. It does **not** yet contain the 10,000-task reliability dataset, measured LLM
+> annotation runs, human adjudication protocol, LARI heatmaps, failure-coding study, or
+> review-rate optimizer described below. See `PAPER_DRAFT.md` for the implementation-status
+> map.
+
 ## Vision Statement
 
 Build **AnnotateBench**: the first benchmark that systematically measures when LLM-generated annotations should be trusted, when they should be verified, and when they will silently fail — providing the community with calibration curves, failure taxonomies, and the **LARI** metric that becomes the standard reliability signal for LLM annotation pipelines.

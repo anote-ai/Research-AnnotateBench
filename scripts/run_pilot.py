@@ -13,6 +13,9 @@ from annotatebench.core import AnnotationStrategy, BUDGET_LEVELS
 from annotatebench.evaluate import pareto_frontier, strategy_comparison
 from annotatebench.datasets import load_banking77, load_financial_phrasebank, load_trec
 from annotatebench.pilot import (
+    DEFAULT_SENTENCE_TRANSFORMER_MODEL,
+    DOWNSTREAM_MODEL_SENTENCE_TRANSFORMER_LOGREG,
+    DOWNSTREAM_MODEL_TFIDF_LOGREG,
     load_text_classification_csv,
     run_text_classification_pilot,
     run_text_classification_pilot_table,
@@ -45,6 +48,12 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--cost-per-sample", type=float, default=0.10)
+    parser.add_argument(
+        "--downstream-model",
+        choices=[DOWNSTREAM_MODEL_TFIDF_LOGREG, DOWNSTREAM_MODEL_SENTENCE_TRANSFORMER_LOGREG],
+        default=DOWNSTREAM_MODEL_TFIDF_LOGREG,
+    )
+    parser.add_argument("--sentence-transformer-model", default=DEFAULT_SENTENCE_TRANSFORMER_MODEL)
     parser.add_argument(
         "--cost-scenarios",
         default="low,base,high",
@@ -101,6 +110,8 @@ def main() -> None:
         budgets=budgets,
         seed=seeds[0],
         cost_per_sample=args.cost_per_sample,
+        downstream_model=args.downstream_model,
+        sentence_transformer_model=args.sentence_transformer_model,
     )
     result_table = run_text_classification_pilot_table(
         dataset,
@@ -114,6 +125,8 @@ def main() -> None:
         seeds=seeds,
         cost_per_sample=args.cost_per_sample,
         cost_scenarios=cost_scenarios,
+        downstream_model=args.downstream_model,
+        sentence_transformer_model=args.sentence_transformer_model,
     )
     output_path = Path(args.output_csv)
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -122,6 +135,7 @@ def main() -> None:
     print(f"Dataset: {dataset.name}")
     print(f"Train: {len(dataset.train_texts)} examples, Test: {len(dataset.test_texts)} examples")
     print(f"Saved results: {output_path}")
+    print(f"Downstream model: {args.downstream_model}")
     print(f"Cost scenarios: {', '.join(cost_scenarios)}")
     print("\nLearning curves:")
     for curve in curves:

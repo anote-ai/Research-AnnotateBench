@@ -22,6 +22,10 @@ from .evaluate import (
 from .data import STRATEGY_F1_CURVES, make_learning_curve, make_full_dataset
 from .costs import COST_SCENARIOS, CostScenario, estimate_annotation_cost, get_cost_scenarios
 from .pilot import (
+    DEFAULT_SENTENCE_TRANSFORMER_MODEL,
+    DOWNSTREAM_MODEL_SENTENCE_TRANSFORMER_LOGREG,
+    DOWNSTREAM_MODEL_TFIDF_LOGREG,
+    SUPPORTED_DOWNSTREAM_MODELS,
     TextClassificationDataset,
     fit_and_score_text_classifier,
     load_text_classification_csv,
@@ -103,6 +107,10 @@ __all__ = [
     "CostScenario",
     "estimate_annotation_cost",
     "get_cost_scenarios",
+    "DEFAULT_SENTENCE_TRANSFORMER_MODEL",
+    "DOWNSTREAM_MODEL_SENTENCE_TRANSFORMER_LOGREG",
+    "DOWNSTREAM_MODEL_TFIDF_LOGREG",
+    "SUPPORTED_DOWNSTREAM_MODELS",
     "TextClassificationDataset",
     "fit_and_score_text_classifier",
     "load_text_classification_csv",
