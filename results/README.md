@@ -1,19 +1,36 @@
 # results/
 
-This directory contains current pilot outputs and should also be the landing spot for future
+This directory contains current benchmark outputs and should also be the landing spot for future
 measured experiments.
 
 Do not commit fabricated "real" results. Synthetic reference curves belong in code comments and
 tests, not in result CSVs.
 
-## Current Pilot Results
+## Current Benchmark Results
 
-The existing `pilot_results*.csv` files come from the public-dataset text-classification pilot.
-They simulate annotation by revealing gold labels from public datasets, train a downstream
-classifier, and report selection-strategy learning curves. These are measured pilot outputs,
-but they are not LLM annotation reliability results.
+The main measured gold-label output is `benchmark_results.csv`, a ten-dataset public text-classification
+benchmark. It simulates annotation by revealing gold labels from public datasets, trains a
+downstream classifier, and reports selection-strategy learning curves. These are measured
+classification benchmark outputs, but they are not LLM annotation reliability results.
 
-Current pilot columns:
+As of the cost-calibration refresh, the row-level `benchmark_results.csv` may be a partial rerun
+if HuggingFace datasets were unavailable locally. Check dataset coverage before using it for
+figures. The summary files `benchmark_best_overall.csv`, `benchmark_best_by_strategy.csv`, and
+`budget_recommendations.csv` retain the earlier ten-dataset measured scores with recalibrated
+base costs.
+
+`benchmark_results_with_llm.csv` is the intended output for the API-backed `llm_annotator`
+strategy. It is generated separately by `scripts/run_llm_strategy_benchmark.py` after
+`OPENAI_API_KEY` is set in the terminal.
+
+`benchmark_results_with_llm_seed0_all_datasets.csv` contains the current ten-dataset seed-0
+LLM annotator grid for budgets 50, 100, and 250. `llm_strategy_seed0_summary.csv` compares those
+rows against the best matching gold-label strategy from `benchmark_results.csv`.
+
+The older `pilot_results*.csv` files are retained as per-dataset pilot outputs for the original
+three-dataset run. Prefer `benchmark_results.csv` for paper tables and figures.
+
+Current benchmark columns:
 
 | column | description |
 |---|---|
@@ -23,12 +40,29 @@ Current pilot columns:
 | seed | strategy-selection seed |
 | macro_f1 | measured downstream macro F1 |
 | accuracy | measured downstream accuracy |
-| cost_scenario | low/base/high cost scenario |
-| human_cost_per_label | scenario cost per revealed label |
+| cost_scenario | calibrated low/base/high cost scenario |
+| cost_source | public pricing source used for the scenario |
+| cost_source_url | URL for the public pricing source |
+| cost_checked_at | date when the pricing source was checked |
+| human_cost_per_label | calibrated cost per revealed label |
 | selection_cost_per_example | strategy overhead assumption |
 | annotation_cost | estimated label cost |
 | selection_cost | estimated selection overhead |
 | total_cost | estimated total cost |
+
+LLM strategy outputs use the same core columns and may additionally include `llm_label_accuracy`,
+`llm_label_macro_f1`, `llm_ece`, `llm_lari`, `model_name`, and `prompt_version`.
+
+LLM summary columns:
+
+| column | description |
+|---|---|
+| macro_f1 | downstream classifier macro F1 trained on LLM-generated labels |
+| best_gold_macro_f1 | best downstream macro F1 among gold-label strategies at the same dataset, budget, seed, and cost scenario |
+| macro_f1_gap_vs_best_gold | `macro_f1 - best_gold_macro_f1` |
+| best_gold_strategy | gold-label strategy that achieved `best_gold_macro_f1` |
+| llm_label_accuracy | agreement between LLM labels and gold labels on the selected training examples |
+| llm_lari | calibration-adjusted LLM label quality diagnostic |
 
 ## Future Reliability Results Schema
 
@@ -42,6 +76,9 @@ Minimum aggregate schema for measured experiment summaries:
 | budget | int | number of labeled or reviewed examples |
 | seed | int | random seed for the run |
 | f1 | float | measured F1 on a held-out evaluation set |
+| input_tokens | int | total API input tokens returned in response usage |
+| output_tokens | int | total API output tokens returned in response usage |
+| total_tokens | int | total API tokens returned in response usage |
 | cost_usd | float | measured or audited cost for the run |
 | model_type | str | downstream model or LLM annotator family |
 | dataset_name | str | concrete dataset used |
@@ -60,6 +97,9 @@ Recommended row-level schema:
 | predicted_label | str | LLM annotation |
 | confidence | float | model confidence in [0, 1] |
 | correct | bool | whether prediction matches gold label |
+| input_tokens | int | API input tokens for the example |
+| output_tokens | int | API output tokens for the example |
+| total_tokens | int | API total tokens for the example |
 | cost_usd | float | measured API or annotation cost |
 | failure_category | str | optional taxonomy category for incorrect examples |
 | notes | str | optional anomalies or run details |

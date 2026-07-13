@@ -31,7 +31,7 @@ def test_llm_annotator_f1_at_50_greater_than_random():
 
 def test_make_full_dataset_length():
     curves = make_full_dataset(seed=42)
-    assert len(curves) == 25
+    assert len(curves) == len(AnnotationStrategy) * len(NLPTask)
 
 
 def test_budget_levels_match():
@@ -41,7 +41,7 @@ def test_budget_levels_match():
 
 
 def test_non_classification_task_curves_do_not_fall_back_to_classification():
-    for task in (NLPTask.QA, NLPTask.SUMMARIZATION, NLPTask.INSTRUCTION_TUNING):
+    for task in (NLPTask.QA, NLPTask.SUMMARIZATION, NLPTask.RELATION_EXTRACTION, NLPTask.INSTRUCTION_TUNING):
         for strategy in AnnotationStrategy:
             classification_curve = make_learning_curve(
                 strategy,
@@ -58,7 +58,7 @@ def test_non_classification_task_curves_do_not_fall_back_to_classification():
 
 
 def test_non_classification_task_curves_are_monotonic_without_noise():
-    for task in (NLPTask.QA, NLPTask.SUMMARIZATION, NLPTask.INSTRUCTION_TUNING):
+    for task in (NLPTask.QA, NLPTask.SUMMARIZATION, NLPTask.RELATION_EXTRACTION, NLPTask.INSTRUCTION_TUNING):
         for strategy in AnnotationStrategy:
             curve = make_learning_curve(strategy, task, noise=0.0, seed=0)
             f1s = [pt.f1 for pt in curve.points]

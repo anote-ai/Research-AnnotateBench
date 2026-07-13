@@ -52,6 +52,16 @@ _SUMMARIZATION_F1_CURVES: Dict[str, List[float]] = {
     AnnotationStrategy.LLM_ANNOTATOR.value:  [0.52, 0.59, 0.65, 0.69, 0.71],
 }
 
+# Relation extraction reference curves: illustrative, not measured. Typed entity
+# pairs make the task harder than flat classification and closer to span tasks.
+_RELATION_EXTRACTION_F1_CURVES: Dict[str, List[float]] = {
+    AnnotationStrategy.RANDOM.value:         [0.28, 0.37, 0.48, 0.56, 0.62],
+    AnnotationStrategy.UNCERTAINTY_AL.value: [0.37, 0.49, 0.61, 0.70, 0.76],
+    AnnotationStrategy.DIVERSITY_AL.value:   [0.34, 0.46, 0.58, 0.66, 0.72],
+    AnnotationStrategy.HYBRID_AL.value:      [0.39, 0.51, 0.63, 0.72, 0.78],
+    AnnotationStrategy.LLM_ANNOTATOR.value:  [0.50, 0.58, 0.66, 0.71, 0.74],
+}
+
 # Instruction-tuning rubric-score reference curves: illustrative, not measured.
 _INSTRUCTION_TUNING_F1_CURVES: Dict[str, List[float]] = {
     AnnotationStrategy.RANDOM.value:         [0.33, 0.42, 0.52, 0.59, 0.64],
@@ -95,6 +105,14 @@ _SUMMARIZATION_COST_PER_BUDGET: Dict[str, List[float]] = {
     AnnotationStrategy.LLM_ANNOTATOR.value:  [45.0, 84.0, 180.0, 330.0, 600.0],
 }
 
+_RELATION_EXTRACTION_COST_PER_BUDGET: Dict[str, List[float]] = {
+    AnnotationStrategy.RANDOM.value:         [12.0, 24.0, 60.0, 120.0, 240.0],
+    AnnotationStrategy.UNCERTAINTY_AL.value: [14.4, 28.8, 67.2, 132.0, 259.2],
+    AnnotationStrategy.DIVERSITY_AL.value:   [15.6, 31.2, 72.0, 139.2, 268.8],
+    AnnotationStrategy.HYBRID_AL.value:      [16.8, 33.6, 76.8, 148.8, 283.2],
+    AnnotationStrategy.LLM_ANNOTATOR.value:  [36.0, 67.2, 144.0, 264.0, 480.0],
+}
+
 _INSTRUCTION_TUNING_COST_PER_BUDGET: Dict[str, List[float]] = {
     AnnotationStrategy.RANDOM.value:         [10.0, 20.0, 50.0, 100.0, 200.0],
     AnnotationStrategy.UNCERTAINTY_AL.value: [12.0, 24.0, 56.0, 110.0, 216.0],
@@ -107,6 +125,7 @@ _TASK_F1_CURVES: Dict[str, Dict[str, List[float]]] = {
     NLPTask.NER.value: _NER_F1_CURVES,
     NLPTask.QA.value: _QA_F1_CURVES,
     NLPTask.SUMMARIZATION.value: _SUMMARIZATION_F1_CURVES,
+    NLPTask.RELATION_EXTRACTION.value: _RELATION_EXTRACTION_F1_CURVES,
     NLPTask.INSTRUCTION_TUNING.value: _INSTRUCTION_TUNING_F1_CURVES,
 }
 
@@ -114,6 +133,7 @@ _TASK_COST_CURVES: Dict[str, Dict[str, List[float]]] = {
     NLPTask.NER.value: _NER_COST_PER_BUDGET,
     NLPTask.QA.value: _QA_COST_PER_BUDGET,
     NLPTask.SUMMARIZATION.value: _SUMMARIZATION_COST_PER_BUDGET,
+    NLPTask.RELATION_EXTRACTION.value: _RELATION_EXTRACTION_COST_PER_BUDGET,
     NLPTask.INSTRUCTION_TUNING.value: _INSTRUCTION_TUNING_COST_PER_BUDGET,
 }
 
@@ -154,7 +174,7 @@ def make_learning_curve(
 
 
 def make_full_dataset(seed: int = 42) -> List[LearningCurve]:
-    """Generate 5 strategies x 5 tasks = 25 learning curves."""
+    """Generate one illustrative curve for every strategy-task pair."""
     rng = random.Random(seed)
     curves: List[LearningCurve] = []
     for strategy in AnnotationStrategy:
