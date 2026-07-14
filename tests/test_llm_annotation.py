@@ -20,6 +20,33 @@ from annotatebench.llm import (
 
 
 ROOT = Path(__file__).resolve().parents[1]
+ROW_LEVEL_COLUMNS = {
+    "run_id",
+    "dataset_name",
+    "split",
+    "seed",
+    "task_type",
+    "example_id",
+    "difficulty_bucket",
+    "annotator_type",
+    "annotator_id",
+    "model_name",
+    "temperature",
+    "prompt_version",
+    "replicate_id",
+    "gold_label",
+    "predicted_label",
+    "confidence",
+    "correct",
+    "input_tokens",
+    "output_tokens",
+    "total_tokens",
+    "cost_usd",
+    "failure_category",
+    "rationale",
+    "notes",
+    "raw_response",
+}
 
 
 def _write_phrasebank_fixture(path: Path) -> None:
@@ -181,9 +208,48 @@ def test_run_llm_annotation_dry_run_writes_summary(tmp_path):
 
     with annotations_path.open(newline="", encoding="utf-8") as handle:
         annotation_row = next(csv.DictReader(handle))
+    assert ROW_LEVEL_COLUMNS.issubset(annotation_row)
+    assert annotation_row["annotator_type"] == "llm"
+    assert annotation_row["temperature"] == "0"
+    assert annotation_row["replicate_id"] == "0"
     assert annotation_row["input_tokens"] == "0"
     assert annotation_row["output_tokens"] == "0"
     assert annotation_row["total_tokens"] == "0"
+
+
+def test_run_llm_annotation_writes_temperature_replicates(tmp_path):
+    data_path = tmp_path / "phrasebank.csv"
+    _write_phrasebank_fixture(data_path)
+    annotations_path = tmp_path / "annotations.csv"
+    summary_path = tmp_path / "summary.csv"
+
+    subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts" / "run_llm_annotation.py"),
+            "--financial-phrasebank-path",
+            str(data_path),
+            "--limit",
+            "1",
+            "--temperatures",
+            "0,0.7",
+            "--replicates",
+            "2",
+            "--dry-run",
+            "--output-csv",
+            str(annotations_path),
+            "--summary-csv",
+            str(summary_path),
+        ],
+        cwd=ROOT,
+        check=True,
+    )
+
+    rows = list(csv.DictReader(annotations_path.open(newline="", encoding="utf-8")))
+
+    assert len(rows) == 4
+    assert {row["temperature"] for row in rows} == {"0", "0.7"}
+    assert {row["replicate_id"] for row in rows} == {"0", "1"}
 
 
 def test_run_llm_strategy_benchmark_dry_run_writes_llm_rows(tmp_path):
@@ -223,8 +289,12 @@ def test_run_llm_strategy_benchmark_dry_run_writes_llm_rows(tmp_path):
     assert row["dataset"] == "financial_phrasebank"
     assert row["budget"] == "2"
     assert row["downstream_model"] == "tfidf_logreg"
+    assert row["temperature"] == "0"
+    assert row["replicate_id"] == "0"
     assert "llm_lari" in row
-    assert list(annotation_dir.glob("*.csv"))
+    cache_path = next(annotation_dir.glob("*.csv"))
+    annotation_row = next(csv.DictReader(cache_path.open(newline="", encoding="utf-8")))
+    assert ROW_LEVEL_COLUMNS.issubset(annotation_row)
 
 
 def test_run_llm_strategy_benchmark_resumes_cached_annotations(tmp_path):
@@ -267,6 +337,54 @@ def test_run_llm_strategy_benchmark_resumes_cached_annotations(tmp_path):
 
     assert resumed_rows[0]["predicted_label"] == "positive"
     assert resumed_rows[0]["confidence"] == "0.91"
+
+
+def test_run_llm_strategy_benchmark_cache_separates_temperature_and_replicate(tmp_path):
+    data_path = tmp_path / "phrasebank.csv"
+    _write_phrasebank_fixture(data_path)
+    output_path = tmp_path / "benchmark_with_llm.csv"
+    annotation_dir = tmp_path / "annotations"
+
+    subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts" / "run_llm_strategy_benchmark.py"),
+            "--datasets",
+            "financial_phrasebank",
+            "--budgets",
+            "1",
+            "--seeds",
+            "0",
+            "--cost-scenarios",
+            "base",
+            "--financial-phrasebank-path",
+            str(data_path),
+            "--temperatures",
+            "0,0.7",
+            "--replicates",
+            "2",
+            "--dry-run",
+            "--annotation-dir",
+            str(annotation_dir),
+            "--output-csv",
+            str(output_path),
+        ],
+        cwd=ROOT,
+        check=True,
+    )
+
+    cache_path = next(annotation_dir.glob("*.csv"))
+    cache_rows = list(csv.DictReader(cache_path.open(newline="", encoding="utf-8")))
+    result_rows = list(csv.DictReader(output_path.open(newline="", encoding="utf-8")))
+
+    assert len(cache_rows) == 4
+    assert len(result_rows) == 4
+    assert {(row["temperature"], row["replicate_id"]) for row in cache_rows} == {
+        ("0", "0"),
+        ("0", "1"),
+        ("0.7", "0"),
+        ("0.7", "1"),
+    }
 
 
 def test_run_llm_strategy_benchmark_uses_nested_seed_cache(tmp_path):

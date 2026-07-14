@@ -151,12 +151,13 @@ def call_chat_completion(
     model: str,
     system_prompt: str,
     user_prompt: str,
+    temperature: float = 0.0,
     max_retries: int = 3,
     retry_sleep_seconds: float = 2.0,
 ) -> dict:
     payload = {
         "model": model,
-        "temperature": 0,
+        "temperature": temperature,
         "response_format": {"type": "json_object"},
         "messages": [
             {"role": "system", "content": system_prompt},

@@ -136,11 +136,19 @@ Recommended row-level schema:
 
 | column | type | description |
 |---|---|---|
+| run_id | str | stable identifier for the annotation run |
 | dataset_name | str | concrete dataset used |
+| split | str | dataset split annotated, such as `train` or `test` |
+| seed | int | random seed used for dataset loading or selection |
 | task_type | str | task type from the reliability benchmark |
 | example_id | str | stable example identifier |
+| difficulty_bucket | str | optional easy/medium/hard or derived difficulty bucket |
+| annotator_type | str | `llm` or `human` |
+| annotator_id | str | stable annotator identity, including model/temperature/replicate for LLMs |
 | model_name | str | LLM annotator name/version |
+| temperature | float | LLM sampling temperature |
 | prompt_version | str | prompt template identifier |
+| replicate_id | int | repeated annotation index for the same model and temperature |
 | gold_label | str | human/gold label |
 | predicted_label | str | LLM annotation |
 | confidence | float | model confidence in [0, 1] |
@@ -155,3 +163,7 @@ Recommended row-level schema:
 Aggregated files may also include `budget`, `seed`, `f1`, `ece`, `lari`, `review_rate`,
 `model_type`, and `notes`, but they should be derived from row-level measured outputs rather
 than hand-entered as projected results.
+
+Use `scripts/make_statistical_appendix.py` on row-level annotation files to produce bootstrap
+confidence intervals, agreement rows when multiple annotators are present, and paired significance
+tests for annotator comparisons.

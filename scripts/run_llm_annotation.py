@@ -11,6 +11,11 @@ from pathlib import Path
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
+from annotatebench.annotation_schema import (
+    ROW_LEVEL_FIELDNAMES,
+    annotator_id,
+    format_temperature,
+)
 from annotatebench.datasets import BENCHMARK_DATASETS, load_benchmark_dataset
 from annotatebench.llm import (
     DEFAULT_API_URL,
@@ -43,6 +48,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--offset", type=int, default=0)
     parser.add_argument("--model", default=os.environ.get("OPENAI_MODEL", "gpt-4o-mini"))
+    parser.add_argument("--temperatures", default="0")
+    parser.add_argument("--replicates", type=int, default=1)
+    parser.add_argument("--run-id")
+    parser.add_argument("--difficulty-csv")
     parser.add_argument("--api-url", default=os.environ.get("OPENAI_API_URL", DEFAULT_API_URL))
     parser.add_argument("--prompt-version")
     parser.add_argument("--prompt-dir", default="prompts")
@@ -54,6 +63,25 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--retry-sleep-seconds", type=float, default=2.0)
     parser.add_argument("--dry-run", action="store_true", help="Exercise the pipeline without calling an API.")
     return parser.parse_args()
+
+
+def parse_csv_floats(raw: str) -> list[float]:
+    values = [float(value.strip()) for value in raw.split(",") if value.strip()]
+    if not values:
+        raise ValueError("At least one temperature is required.")
+    return values
+
+
+def load_difficulty_buckets(path: str | None) -> dict[str, str]:
+    if path is None:
+        return {}
+    with Path(path).open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+    required = {"example_id", "difficulty_bucket"}
+    missing = required.difference(rows[0].keys() if rows else [])
+    if missing:
+        raise ValueError(f"Missing difficulty columns: {sorted(missing)}")
+    return {str(row["example_id"]): str(row["difficulty_bucket"]) for row in rows}
 
 
 def selected_examples(args: argparse.Namespace) -> tuple[str, list[str], list[str], list[str]]:
@@ -137,12 +165,17 @@ def main() -> None:
     args = parse_args()
     if not args.dry_run and not os.environ.get("OPENAI_API_KEY"):
         raise SystemExit("OPENAI_API_KEY is required unless --dry-run is set.")
+    if args.replicates <= 0:
+        raise SystemExit("--replicates must be positive.")
 
+    temperatures = parse_csv_floats(args.temperatures)
     prompt_version = args.prompt_version or default_prompt_version(args.dataset)
     system_prompt, user_template = load_prompt(args.prompt_dir, prompt_version)
     dataset_name, texts, gold_labels, label_names = selected_examples(args)
     if not texts:
         raise SystemExit("No examples selected.")
+    run_id = args.run_id or f"{dataset_name}_{args.split}_seed{args.seed}_{args.model}_{prompt_version}"
+    difficulty_buckets = load_difficulty_buckets(args.difficulty_csv)
     pricing = make_pricing(
         model=args.model,
         input_usd_per_million_tokens=args.input_usd_per_million_tokens,
@@ -151,25 +184,6 @@ def main() -> None:
 
     output_path = Path(args.output_csv)
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    fieldnames = [
-        "dataset_name",
-        "task_type",
-        "example_id",
-        "model_name",
-        "prompt_version",
-        "gold_label",
-        "predicted_label",
-        "confidence",
-        "correct",
-        "input_tokens",
-        "output_tokens",
-        "total_tokens",
-        "cost_usd",
-        "failure_category",
-        "rationale",
-        "notes",
-        "raw_response",
-    ]
     predicted_labels: list[str] = []
     confidences: list[float] = []
     input_tokens: list[int] = []
@@ -180,66 +194,81 @@ def main() -> None:
     stopped_early = False
 
     with output_path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer = csv.DictWriter(handle, fieldnames=ROW_LEVEL_FIELDNAMES)
         writer.writeheader()
         for local_idx, (text, gold_label) in enumerate(zip(texts, gold_labels)):
             example_id = f"{dataset_name}_{args.split}_{args.offset + local_idx}"
-            user_prompt = build_user_prompt(
-                user_template,
-                text=text,
-                dataset_name=dataset_name,
-                label_names=label_names,
-            )
-            try:
-                annotation = (
-                    dry_run_annotation(label_names)
-                    if args.dry_run
-                    else call_chat_completion(
-                        api_url=args.api_url,
-                        api_key=os.environ["OPENAI_API_KEY"],
-                        model=args.model,
-                        system_prompt=system_prompt,
-                        user_prompt=user_prompt,
-                        max_retries=args.max_retries,
-                        retry_sleep_seconds=args.retry_sleep_seconds,
+            for temperature in temperatures:
+                for replicate_id in range(args.replicates):
+                    user_prompt = build_user_prompt(
+                        user_template,
+                        text=text,
+                        dataset_name=dataset_name,
+                        label_names=label_names,
                     )
-                )
-                parsed = normalize_annotation(annotation, label_names, pricing)
-                notes = "dry_run" if args.dry_run else ""
-            except (KeyError, TypeError, ValueError, json.JSONDecodeError, RuntimeError) as exc:
-                stopped_early = True
-                print(f"Stopping before {example_id}: {exc}", file=sys.stderr)
-                break
+                    try:
+                        annotation = (
+                            dry_run_annotation(label_names)
+                            if args.dry_run
+                            else call_chat_completion(
+                                api_url=args.api_url,
+                                api_key=os.environ["OPENAI_API_KEY"],
+                                model=args.model,
+                                system_prompt=system_prompt,
+                                user_prompt=user_prompt,
+                                temperature=temperature,
+                                max_retries=args.max_retries,
+                                retry_sleep_seconds=args.retry_sleep_seconds,
+                            )
+                        )
+                        parsed = normalize_annotation(annotation, label_names, pricing)
+                        notes = "dry_run" if args.dry_run else ""
+                    except (KeyError, TypeError, ValueError, json.JSONDecodeError, RuntimeError) as exc:
+                        stopped_early = True
+                        print(f"Stopping before {example_id}: {exc}", file=sys.stderr)
+                        break
 
-            completed_gold_labels.append(gold_label)
-            predicted_labels.append(parsed.predicted_label)
-            confidences.append(parsed.confidence)
-            input_tokens.append(parsed.input_tokens)
-            output_tokens.append(parsed.output_tokens)
-            total_tokens.append(parsed.total_tokens)
-            if parsed.cost_usd is not None:
-                costs_usd.append(parsed.cost_usd)
-            writer.writerow(
-                {
-                    "dataset_name": dataset_name,
-                    "task_type": "classification",
-                    "example_id": example_id,
-                    "model_name": args.model,
-                    "prompt_version": prompt_version,
-                    "gold_label": gold_label,
-                    "predicted_label": parsed.predicted_label,
-                    "confidence": parsed.confidence,
-                    "correct": gold_label == parsed.predicted_label,
-                    "input_tokens": parsed.input_tokens,
-                    "output_tokens": parsed.output_tokens,
-                    "total_tokens": parsed.total_tokens,
-                    "cost_usd": "" if parsed.cost_usd is None else parsed.cost_usd,
-                    "failure_category": "",
-                    "rationale": parsed.rationale,
-                    "notes": notes,
-                    "raw_response": json.dumps(parsed.raw_response, ensure_ascii=True),
-                }
-            )
+                    completed_gold_labels.append(gold_label)
+                    predicted_labels.append(parsed.predicted_label)
+                    confidences.append(parsed.confidence)
+                    input_tokens.append(parsed.input_tokens)
+                    output_tokens.append(parsed.output_tokens)
+                    total_tokens.append(parsed.total_tokens)
+                    if parsed.cost_usd is not None:
+                        costs_usd.append(parsed.cost_usd)
+                    writer.writerow(
+                        {
+                            "run_id": run_id,
+                            "dataset_name": dataset_name,
+                            "split": args.split,
+                            "seed": args.seed,
+                            "task_type": "classification",
+                            "example_id": example_id,
+                            "difficulty_bucket": difficulty_buckets.get(example_id, ""),
+                            "annotator_type": "llm",
+                            "annotator_id": annotator_id(args.model, temperature, replicate_id),
+                            "model_name": args.model,
+                            "temperature": format_temperature(temperature),
+                            "prompt_version": prompt_version,
+                            "replicate_id": replicate_id,
+                            "gold_label": gold_label,
+                            "predicted_label": parsed.predicted_label,
+                            "confidence": parsed.confidence,
+                            "correct": gold_label == parsed.predicted_label,
+                            "input_tokens": parsed.input_tokens,
+                            "output_tokens": parsed.output_tokens,
+                            "total_tokens": parsed.total_tokens,
+                            "cost_usd": "" if parsed.cost_usd is None else parsed.cost_usd,
+                            "failure_category": "",
+                            "rationale": parsed.rationale,
+                            "notes": notes,
+                            "raw_response": json.dumps(parsed.raw_response, ensure_ascii=True),
+                        }
+                    )
+                if stopped_early:
+                    break
+            if stopped_early:
+                break
 
     if not completed_gold_labels:
         raise SystemExit("No completed annotations; summary metrics were not written.")
@@ -262,7 +291,10 @@ def main() -> None:
     )
     print(f"Saved row-level annotations: {output_path}")
     print(f"Saved summary metrics: {summary_path}")
-    print(f"Completed examples: {len(completed_gold_labels)} / {len(gold_labels)}")
+    print(
+        "Completed annotations: "
+        f"{len(completed_gold_labels)} / {len(gold_labels) * len(temperatures) * args.replicates}"
+    )
     if stopped_early:
         print("Run stopped early; outputs contain only completed measured annotations.")
 
