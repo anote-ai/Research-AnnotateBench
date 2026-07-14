@@ -1,0 +1,2 @@
+dataset_name,split,model_name,prompt_version,n_examples,accuracy,macro_f1,ece,lari,error_count,input_tokens,output_tokens,total_tokens,cost_usd,confusion_json
+financial_phrasebank,test,gpt-4o-mini,financial_phrasebank_v1_zero_shot_json,600,0.99,0.9873927242348296,0.16116666666666665,0.8282579301789829,6,160218,26896,187114,0,"{""negative"": {""negative"": 102, ""neutral"": 0, ""positive"": 0}, ""neutral"": {""negative"": 0, ""neutral"": 396, ""positive"": 0}, ""positive"": {""negative"": 0, ""neutral"": 6, ""positive"": 96}}"

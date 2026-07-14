@@ -1,0 +1,2 @@
+dataset_name,split,model_name,prompt_version,n_examples,accuracy,macro_f1,ece,lari,error_count,input_tokens,output_tokens,total_tokens,cost_usd,confusion_json
+tweet_eval_sentiment,test,gpt-4o-mini,text_classification_v1_zero_shot_json,600,0.7816666666666666,0.7657209948213609,0.02641666666666667,0.7454931985414966,131,136974,24353,161327,0,"{""negative"": {""negative"": 185, ""neutral"": 37, ""positive"": 0}, ""neutral"": {""negative"": 35, ""neutral"": 218, ""positive"": 11}, ""positive"": {""negative"": 0, ""neutral"": 48, ""positive"": 66}}"
