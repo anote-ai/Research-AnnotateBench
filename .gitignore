@@ -11,6 +11,9 @@ build/
 .env
 .env.*
 data/raw/
+results/artifact_smoke/
+results/annotation_runs/
+figures/artifact_smoke/
 *.aux
 *.log
 *.out
