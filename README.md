@@ -20,6 +20,19 @@ It does not yet contain human adjudication, failure-taxonomy coding, a review-ra
 the full cross-model reliability study. See `BLOG.md`, `PAPER_DRAFT.md`, and `results/README.md`
 for the claim boundary.
 
+## Reproducibility Artifact
+
+Reviewer-facing artifact instructions are in `ARTIFACT.md`. To validate the local pipeline without
+network access, private datasets, or API keys, run:
+
+```bash
+./scripts/run_all.sh
+```
+
+This writes smoke-test outputs under `results/artifact_smoke/` and figures under
+`figures/artifact_smoke/`. These outputs are for artifact validation only and are not benchmark
+findings.
+
 ## Benchmark Grid
 
 The measured benchmark covers 10 public text-classification datasets x 5 annotation strategies across budget levels. Four strategies reveal existing gold labels under different selection policies; the fifth strategy, `llm_annotator`, labels selected training examples with an OpenAI model and trains the same downstream classifier on those model-generated labels.
