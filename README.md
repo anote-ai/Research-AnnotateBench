@@ -35,7 +35,12 @@ findings.
 
 ## Benchmark Grid
 
-The measured benchmark covers 10 public text-classification datasets x 5 annotation strategies across budget levels. Four strategies reveal existing gold labels under different selection policies; the fifth strategy, `llm_annotator`, labels selected training examples with an OpenAI model and trains the same downstream classifier on those model-generated labels.
+The primary measured gold-label benchmark covers 10 public text-classification
+datasets x 4 selection strategies x 5 budget levels x 3 seeds x 3 cost
+scenarios. A separate seed-0 `llm_annotator` extension covers the same 10
+datasets at budgets 50, 100, and 250 by labeling selected training examples
+with an OpenAI model and training the same downstream classifier on those
+model-generated labels.
 
 **Measured datasets:** Financial PhraseBank, TREC, Banking77, AG News, SST-2, 20 Newsgroups, Rotten Tomatoes, Yelp Polarity, TweetEval Sentiment, and Emotion.
 
