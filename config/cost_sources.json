@@ -47,7 +47,7 @@
   "llm_api_sources": [
     {
       "name": "OpenAI API pricing",
-      "url": "https://openai.com/api/pricing/",
+      "url": "https://platform.openai.com/docs/pricing",
       "unit": "USD per 1M input and output tokens",
       "formula": "input_tokens * input_usd_per_million_tokens / 1000000 + output_tokens * output_usd_per_million_tokens / 1000000",
       "notes": "Keep model prices in experiment metadata when running API-backed annotation. The repository can estimate token-based costs without storing an API key."
