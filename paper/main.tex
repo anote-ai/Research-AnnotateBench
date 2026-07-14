@@ -63,7 +63,7 @@ The classification suite includes Financial PhraseBank, TREC question classifica
 
 \begin{table}[t]
 \centering
-\caption{Evidence matrix for related work. Prior studies motivate LLM-assisted annotation, active selection, and data-centric benchmarking, but they rarely combine budget sweeps, strategy comparison, downstream model evaluation, cost frontiers, and disagreement handling in one protocol.}
+\caption{Representative evidence matrix for related work. Prior studies motivate LLM-assisted annotation, active selection, and data-centric benchmarking, but they rarely combine budget sweeps, strategy comparison, downstream model evaluation, cost frontiers, and disagreement handling in one protocol.}
 \label{tab:literature-novelty}
 \scriptsize
 \setlength{\tabcolsep}{2.5pt}
@@ -85,7 +85,7 @@ Pilot classification datasets \citep{malo2014good,li2002learning,casanueva2020ef
 \end{tabularx}
 \end{table}
 
-The resulting novelty claim is therefore deliberately operational. Prior work largely asks whether LLMs can substitute for human annotators, or whether active learning improves a particular labeling pipeline. AnnotateBench instead asks which annotation strategy produces the best downstream model under a fixed budget, where the strategy can be human labeling, active selection, LLM labeling, or a hybrid, and where success is judged by learning curves and cost-efficient strategy-budget choices rather than by one label-agreement score alone.
+The resulting novelty claim is therefore deliberately operational. Across this representative set of prior work, most LLM-as-annotator studies emphasize label accuracy, human--LLM agreement, cost, or downstream performance, while active-learning work emphasizes selection policies and label efficiency. AnnotateBench instead asks which annotation strategy produces the best downstream model under a fixed budget, where the strategy can be human labeling, active selection, LLM labeling, or a hybrid, and where success is judged by learning curves and cost-efficient strategy-budget choices rather than by one label-agreement score alone.
 
 \section{Methodology}
 
@@ -180,7 +180,7 @@ Yelp Polarity & Hybrid AL & 0.860 $\pm$ 0.020 & 1000 & \$99.20 \\
 \end{tabular}
 \end{table}
 
-The budget recommendation table in \texttt{results/budget\_recommendations.csv} shows that cost-efficient target attainment is highly dataset-dependent. AG News reaches target macro F1 0.80 with 1000 random labels, while Yelp Polarity reaches 0.80 with diversity sampling at 1000 labels. Financial PhraseBank reaches 0.75 with uncertainty sampling at 500 labels but does not reach 0.80 in the current grid. Several harder datasets do not reach 0.50 macro F1 under this simple TF-IDF logistic-regression setup, including Emotion, TweetEval Sentiment, and 20 Newsgroups.
+The budget recommendation table in \texttt{results/budget\_recommendations.csv} shows that cost-efficient target attainment is highly dataset-dependent. AG News reaches target macro F1 0.75 with 1000 random labels but does not reach 0.80 in the current grid, while Yelp Polarity reaches 0.80 with diversity sampling at 1000 labels. Financial PhraseBank reaches 0.75 with uncertainty sampling at 500 labels but does not reach 0.80 in the current grid. Several harder datasets do not reach 0.50 macro F1 under this simple TF-IDF logistic-regression setup, including Emotion, TweetEval Sentiment, and 20 Newsgroups.
 
 These results support the benchmark framing rather than a universal strategy claim. Active-learning variants help on some datasets, especially Financial PhraseBank, TREC, and Yelp Polarity, but random sampling remains competitive or best on several topic and intent datasets. This matters for annotation planning: strategy choice should be evaluated jointly with dataset, label budget, model family, and cost assumptions rather than selected by default.
 
@@ -227,7 +227,7 @@ Yelp Polarity & 0.681 & 0.639 & 0.042 & 0.972 & 0.891 \\
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.86\textwidth]{../figures/pareto_ag_news.png}
-\caption{Cost-performance Pareto frontier for AG News under the base cost scenario. Random sampling is highly competitive on this topic-classification task.}
+\caption{Cost-performance Pareto frontier for AG News under the base cost scenario. The frontier illustrates why strategy choice must be read jointly with budget and cost: random sampling provides cheaper target attainment at intermediate thresholds, while the best overall score in Table~\ref{tab:benchmark-results} comes from hybrid active learning.}
 \label{fig:pareto-ag-news}
 \end{figure}
 
