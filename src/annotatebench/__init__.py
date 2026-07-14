@@ -79,7 +79,17 @@ from .datasets import (
     load_twenty_newsgroups,
     load_yelp_polarity,
 )
-from .metrics import calibration_score, expected_calibration_error, lari_score
+from .metrics import (
+    BootstrapInterval,
+    bonferroni_significant,
+    bootstrap_confidence_interval,
+    calibration_score,
+    expected_calibration_error,
+    group_metric_variance,
+    gwet_ac1,
+    lari_score,
+    paired_bootstrap_p_value,
+)
 from .taxonomy import FailureCategory, FailureCode, summarize_failure_codes
 
 __all__ = [
@@ -155,9 +165,15 @@ __all__ = [
     "load_tweet_eval_sentiment",
     "load_twenty_newsgroups",
     "load_yelp_polarity",
+    "BootstrapInterval",
+    "bonferroni_significant",
+    "bootstrap_confidence_interval",
     "calibration_score",
     "expected_calibration_error",
+    "group_metric_variance",
+    "gwet_ac1",
     "lari_score",
+    "paired_bootstrap_p_value",
     "FailureCategory",
     "FailureCode",
     "summarize_failure_codes",
