@@ -55,6 +55,38 @@ Current benchmark columns:
 LLM strategy outputs use the same core columns and may additionally include `llm_label_accuracy`,
 `llm_label_macro_f1`, `llm_ece`, `llm_lari`, `model_name`, and `prompt_version`.
 
+## Result QA Utilities
+
+Use `scripts/sanity_check_results.py` for lightweight CSV checks before making paper tables or
+figures. It validates duplicate condition keys, missing key values, metric ranges, non-negative
+costs, and optional key coverage against a baseline result file.
+
+Use `scripts/make_run_manifest.py` to record result-file provenance and coverage, including file
+hashes, row counts, columns, datasets, strategies, budgets, seeds, model identifiers, and metric
+ranges.
+
+Use `scripts/sample_failure_cases.py` to sample incorrect row-level annotation examples for
+qualitative review. It expects either a `correct` column or `gold_label`/`predicted_label` columns.
+
+Example commands:
+
+```bash
+python scripts/sanity_check_results.py \
+  --results results/benchmark_results_sentence_transformer_logreg.csv \
+  --baseline results/benchmark_results.csv \
+  --cost-scenario base \
+  --output-csv results/sanity_check_sentence_transformer_logreg.csv
+
+python scripts/make_run_manifest.py \
+  --results results/benchmark_results.csv results/benchmark_results_sentence_transformer_logreg.csv \
+  --output-csv results/run_manifest_current.csv
+
+python scripts/sample_failure_cases.py \
+  --annotations results/llm_annotations/*_llm_annotator_seed0_budget50.csv \
+  --n-per-group 5 \
+  --output-csv results/failure_case_samples_seed0_budget50.csv
+```
+
 Paper core summary columns:
 
 | column | description |
