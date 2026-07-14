@@ -210,6 +210,8 @@ Yelp Polarity & 0.681 & 0.639 & 0.042 & 0.972 & 0.891 \\
 \end{tabular}
 \end{table}
 
+We further ran a row-level reliability pilot on Financial PhraseBank, TREC, and TweetEval Sentiment. Each pilot annotated 100 held-out test examples with \texttt{gpt-4o-mini} at temperatures 0 and 0.7, with three replicates per temperature, for 600 annotations per dataset. Financial PhraseBank is the high-agreement case, with 0.990 accuracy, 0.987 macro F1, ECE 0.161, and LARI 0.828; all six errors are positive examples predicted as neutral. TREC is harder under the same design, with 0.792 accuracy, 0.674 macro F1, ECE 0.084, and LARI 0.617. TweetEval Sentiment falls between them, with 0.782 accuracy, 0.766 macro F1, ECE 0.026, and LARI 0.745, and most errors soften negative or positive tweets into the neutral class. Pairwise temperature and replicate comparisons are not significant after Bonferroni correction in all three pilots. These row-level pilots are diagnostic case studies rather than a full LLM reliability benchmark.
+
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.86\textwidth]{../figures/learning_curve_financial_phrasebank.png}
