@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 
 from annotatebench.llm import (
     build_user_prompt,
@@ -17,6 +18,7 @@ from annotatebench.llm import (
     normalize_annotation,
     normalize_label,
 )
+from run_llm_annotation import write_summary
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -215,6 +217,31 @@ def test_run_llm_annotation_dry_run_writes_summary(tmp_path):
     assert annotation_row["input_tokens"] == "0"
     assert annotation_row["output_tokens"] == "0"
     assert annotation_row["total_tokens"] == "0"
+
+
+def test_write_summary_counts_schema_external_predictions(tmp_path):
+    summary_path = tmp_path / "summary.csv"
+
+    write_summary(
+        path=summary_path,
+        dataset_name="fixture",
+        split="test",
+        model="model",
+        prompt_version="prompt",
+        label_names=["A", "B"],
+        gold_labels=["A", "B"],
+        predicted_labels=["A", "C"],
+        confidences=[0.9, 0.8],
+        input_tokens=[0, 0],
+        output_tokens=[0, 0],
+        total_tokens=[0, 0],
+        costs_usd=[0, 0],
+    )
+
+    with summary_path.open(newline="", encoding="utf-8") as handle:
+        row = next(csv.DictReader(handle))
+    assert float(row["macro_f1"]) == pytest.approx(1 / 3)
+    assert '"C": 1' in row["confusion_json"]
 
 
 def test_run_llm_annotation_writes_temperature_replicates(tmp_path):

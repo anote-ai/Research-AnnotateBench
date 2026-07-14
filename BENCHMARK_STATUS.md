@@ -25,7 +25,7 @@ Run:
 Current status:
 
 - Benchmark validation passed.
-- Test suite passed with 101 tests.
+- Test suite passed with 114 tests.
 
 ## Downstream model robustness status
 
@@ -34,13 +34,16 @@ Implemented:
 - The default measured benchmark remains TF-IDF + logistic regression.
 - `scripts/run_benchmark.py`, `scripts/run_pilot.py`, and
   `scripts/run_llm_strategy_benchmark.py` accept `--downstream-model`.
-- `sentence_transformer_logreg` is available as an optional robustness path when the
-  `sentence-transformers` package and model weights are installed locally.
+- `results/benchmark_results_sentence_transformer_logreg.csv` contains the measured ten-dataset
+  sentence-transformer + logistic-regression robustness grid.
+- `results/downstream_model_comparison_best.csv` and
+  `results/downstream_model_comparison_summary.csv` compare the robustness grid against the
+  primary TF-IDF baseline.
 
-Still not claimed as complete:
+Claim boundary:
 
-- The sentence-transformer downstream comparison has not been run as a measured result in this
-  repository snapshot.
+- The sentence-transformer results are exploratory robustness evidence. The primary paper table
+  remains the TF-IDF + logistic-regression benchmark.
 
 ## LLM annotator strategy status
 
@@ -52,10 +55,14 @@ Implemented:
 - `scripts/run_llm_strategy_benchmark.py` emits benchmark-style `llm_annotator` rows by training the shared downstream classifier on LLM-generated labels.
 - `results/benchmark_results_with_llm_seed0_all_datasets.csv` contains a ten-dataset seed-0 LLM annotator grid for budgets 50, 100, and 250.
 - `results/llm_strategy_seed0_summary.csv` compares those LLM rows against the best matching gold-label strategy.
+- `results/statistical_appendix.csv` and `results/statistical_significance.csv` contain combined
+  aggregate diagnostics for the Financial PhraseBank, TREC, and TweetEval Sentiment row-level
+  reliability pilots.
 
 Still not claimed as complete:
 
 - Multi-seed API-backed `llm_annotator` grid.
+- Measured API cost frontiers for the LLM annotator rows.
 - Cross-model agreement.
 - Failure-taxonomy coding of real LLM errors.
 - Human adjudication or review-rate optimization.

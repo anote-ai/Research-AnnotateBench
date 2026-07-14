@@ -49,9 +49,9 @@ active learning. Annotation is simulated by revealing existing gold labels from 
 The `llm_annotator` strategy instead labels selected training examples with an OpenAI model and
 trains the same downstream classifier on those model-generated labels.
 
-The benchmark runners also support an optional `sentence_transformer_logreg` downstream model for
-robustness checks. This path requires installing the optional `sentence-transformers` package and
-is intended for separate comparison CSVs rather than overwriting the measured TF-IDF benchmark.
+The repository also includes a measured `sentence_transformer_logreg` downstream-model robustness
+check in separate comparison CSVs. These results support the sensitivity analysis, but the primary
+benchmark remains the controlled TF-IDF + logistic-regression setup.
 
 ## Pareto Analysis
 
@@ -161,6 +161,10 @@ Run the optional embedding-model robustness check after installing `sentence-tra
   --output-csv results/benchmark_results_sentence_transformer_logreg.csv
 ```
 
+The current robustness artifact is already summarized in
+`results/downstream_model_comparison_best.csv` and
+`results/downstream_model_comparison_summary.csv`.
+
 Run budget recommendations across available benchmark CSVs:
 
 ```bash
@@ -242,15 +246,16 @@ only when you intentionally want to refresh all annotations.
 
 ## Venue
 
-**JDSE 2026** draft materials are in `paper/main.tex`. The ten-dataset classification
-benchmark artifacts are present; the project is not yet submission-ready for the full
-`DESIGN_DOC.md` LLM reliability claims.
+**JDSE 2026** draft materials are in `paper/main.tex`. The submission scope is a
+text-classification annotation-strategy benchmark with a seed-0 LLM annotator extension and small
+row-level reliability pilots. The broader `DESIGN_DOC.md` LLM reliability benchmark remains future
+work.
 
 ## Citation
 
 ```bibtex
 @article{anote2026annotatebench,
-  title   = {AnnotateBench: How Much Labeled Data Do Annotation Strategies Need Across NLP Tasks?},
+  title   = {AnnotateBench: How Much Labeled Data Do Text-Classification Annotation Strategies Need?},
   author  = {Anote AI},
   journal = {JDSE},
   year    = {2026},
