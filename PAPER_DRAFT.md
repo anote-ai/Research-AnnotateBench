@@ -34,8 +34,9 @@ benchmark, human adjudication, calibrated review policies, or a coded failure-ta
   `results/llm_strategy_seed0_summary.csv`.
 - Benchmark validation in `scripts/validate_benchmark_results.py`.
 - Paper summary generation in `scripts/make_paper_summary_table.py`.
-- Optional downstream-model comparison support for `sentence_transformer_logreg`; this is
-  implemented as a runner option but is not yet a measured result.
+- Optional downstream-model comparison support for `sentence_transformer_logreg`, with measured
+  ten-dataset robustness outputs in `results/benchmark_results_sentence_transformer_logreg.csv`
+  and `results/downstream_model_comparison_*.csv`.
 - LLM annotator scripts in `scripts/run_llm_annotation.py` and
   `scripts/run_llm_strategy_benchmark.py`.
 - ECE/LARI metric primitives in `src/annotatebench/metrics/lari.py`.
@@ -49,8 +50,8 @@ benchmark, human adjudication, calibrated review policies, or a coded failure-ta
   annotation failures has been coded by human reviewers.
 - The paper draft in `paper/main.tex` reports the classification strategy benchmark, not the full
   reliability benchmark described in `DESIGN_DOC.md`.
-- Stronger downstream learner support exists, but the sentence-transformer comparison still needs
-  to be run and summarized before it can be claimed as evidence.
+- The sentence-transformer comparison is measured and summarized, but should be presented as
+  exploratory robustness evidence rather than as the primary benchmark table.
 
 ## Not Yet Implemented
 
@@ -81,8 +82,10 @@ benchmark, human adjudication, calibrated review policies, or a coded failure-ta
 
 ## Next Required Evidence
 
-Before making the `DESIGN_DOC.md` claims, the project needs at least one small measured LLM
-annotation reliability pilot. A minimal pilot should produce rows with:
+Before making the full `DESIGN_DOC.md` claims, the project needs larger multi-model and
+human-reviewed LLM annotation reliability evidence. The current repository already includes small
+row-level pilots for Financial PhraseBank, TREC, and TweetEval Sentiment; future pilots should keep
+the same row-level schema with:
 
 - dataset and task type;
 - model and prompt version;
@@ -125,7 +128,8 @@ replicates per temperature. Financial PhraseBank is the high-agreement case: acr
 annotations from 100 unique test examples, `gpt-4o-mini` reaches 0.990 accuracy, 0.987 macro F1,
 ECE 0.161, and LARI 0.828, with all six errors coming from positive examples predicted as neutral.
 TREC is a harder multi-class schema case: across the same 600-annotation design, accuracy drops to
-0.792 and macro F1 to 0.674, with ECE 0.084 and LARI 0.617. TweetEval Sentiment sits between these
+0.792 and macro F1 to 0.562, with ECE 0.084 and LARI 0.514 when schema-external predictions are
+included in the metric label set. TweetEval Sentiment sits between these
 two cases, with 0.782 accuracy, 0.766 macro F1, ECE 0.026, and LARI 0.745; its main error pattern
 is sentiment softening into the neutral class. Pairwise temperature/replicate comparisons are not
 significant after Bonferroni correction in all three pilots. These pilots are not a full LLM

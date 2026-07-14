@@ -1,40 +1,73 @@
-# How Much Labeled Data Do Annotation Strategies Need?
+# How Much Labeled Data Do Text-Classification Annotation Strategies Need?
 
-AnnotateBench is currently a framework for comparing annotation strategies with learning
-curves, cost estimates, and Pareto frontiers. It helps answer a practical planning question:
-if a team can label 50, 100, 250, 500, or 1000 examples, which selection strategy gives the
-best downstream model quality for the cost?
+Annotation strategy is usually chosen before a team has much evidence. A project might label the
+next random 250 examples, use uncertainty sampling, ask an LLM to label a batch, or keep labeling
+until the budget runs out. AnnotateBench turns that planning decision into a benchmark question:
+given a fixed label budget, which strategy produces the best downstream classifier, and where does
+the cost-performance frontier change?
 
-The repository has two tracks today:
+The current release is deliberately scoped. It is a text-classification annotation-strategy
+benchmark, not the full multi-task LLM annotation reliability benchmark described in
+`DESIGN_DOC.md`.
 
-- an illustrative synthetic demo covering random sampling, active-learning variants, and an
-  LLM annotator placeholder across five NLP task types;
-- a real text-classification pilot that reveals gold labels from public datasets and trains
-  TF-IDF logistic-regression classifiers under budgeted selection strategies.
+## What Is Measured
 
-The current pilot is useful, but it is not the full AnnotateBench research vision from
-`DESIGN_DOC.md`. The design doc describes a broader LLM annotation reliability benchmark:
-10,000 annotation tasks, real LLM annotations, human gold labels, calibration metrics, a
-failure taxonomy, and a human-review optimizer. That reliability study is not complete yet.
+The main benchmark uses ten public text-classification datasets: Financial PhraseBank, TREC,
+Banking77, AG News, SST-2, 20 Newsgroups, Rotten Tomatoes, Yelp Polarity, TweetEval Sentiment, and
+Emotion. For each dataset, AnnotateBench simulates annotation by revealing existing gold labels at
+budgets 50, 100, 250, 500, and 1000.
 
-## What Is Real Today
+The primary grid compares four strategies: random sampling, uncertainty active learning, diversity
+active learning, and a hybrid active-learning strategy. Each condition trains the same TF-IDF +
+logistic-regression classifier and records macro F1, accuracy, and cost estimates. The full
+gold-label grid contains 1,800 measured rows.
 
-The public-dataset pilot measures downstream classification performance after revealing gold
-labels selected by random, uncertainty, diversity, and hybrid active-learning strategies. These
-results are real outputs of the pilot scripts, but they do not measure whether LLM-generated
-annotations are calibrated or trustworthy.
+The headline result is not that one strategy always wins. Strategy choice is dataset-dependent.
+Financial PhraseBank and SST-2 favor uncertainty sampling in the primary table. AG News, Emotion,
+Rotten Tomatoes, TREC, TweetEval Sentiment, and Yelp Polarity favor the hybrid strategy. Banking77
+and 20 Newsgroups are strongest with random sampling under the primary TF-IDF setup. That variation
+is the point: annotation plans should be evaluated against the dataset, budget, model family, and
+cost assumptions instead of chosen by habit.
 
-The synthetic curves in `src/annotatebench/data.py` are different. They are hand-specified
-reference curves used to exercise the learning-curve and cost-analysis code. They should not
-be cited as empirical findings.
+## What The LLM Extension Shows
 
-## What Is Still Missing
+AnnotateBench also includes a seed-0 LLM annotator extension. For all ten datasets, `gpt-4o-mini`
+labels randomly selected training examples at budgets 50, 100, and 250. The benchmark then trains
+the same downstream classifier on those model-generated labels and evaluates on the gold test set.
 
-The most important research gap is the LARI/calibration track. The code now includes small
-metric primitives for ECE and LARI, plus a failure-taxonomy data structure, but the project
-still needs real LLM annotation outputs, confidence scores, human gold labels, taxonomy coding,
-and review-rate experiments before it can support the claims in `DESIGN_DOC.md`.
+At budget 250, LLM label quality and downstream utility are related but not interchangeable. Yelp
+Polarity is the strongest case: the LLM-trained classifier reaches 0.681 macro F1, slightly above
+the best matching gold-label strategy at 0.639, with 0.972 label accuracy on the selected examples.
+Financial PhraseBank is close to the gold-label strategy, with 0.626 versus 0.642 macro F1. Other
+datasets show larger gaps even when label accuracy is high, which suggests that LLM annotations
+need to be evaluated as a budgeted strategy rather than treated as automatic replacements for
+human or gold labels.
 
-The practical next milestone is to run a small real reliability pilot: pick one task, collect
-LLM predictions with confidences, compare against gold labels, compute F1/ECE/LARI, code a
-sample of failures, and report exactly what is measured.
+These LLM rows currently use zero-estimate API cost placeholders, so they should not be read as
+part of the human-label Pareto frontier yet.
+
+## Reliability Pilots
+
+The release includes small row-level reliability pilots for Financial PhraseBank, TREC, and
+TweetEval Sentiment. Each pilot annotates 100 held-out test examples with `gpt-4o-mini` at
+temperatures 0 and 0.7, with three replicates per temperature, for 600 annotations per dataset.
+
+Financial PhraseBank is the high-agreement case: 0.990 accuracy, 0.987 macro F1, ECE 0.161, and
+LARI 0.828. TREC is harder: 0.792 accuracy, 0.562 macro F1, ECE 0.084, and LARI 0.514 when
+schema-external predictions are counted. TweetEval Sentiment sits between them with 0.782
+accuracy, 0.766 macro F1, ECE 0.026, and LARI 0.745.
+
+These pilots are diagnostic evidence, not a completed reliability benchmark. They show how the
+row-level schema can support calibration, agreement, and failure-pattern analysis, but they do not
+replace a larger multi-model, human-reviewed study.
+
+## What Comes Next
+
+The next step is not to claim that LLM annotation is solved. It is to make the benchmark more
+complete: add measured API costs, expand the LLM annotator grid beyond seed 0, code real failure
+categories, compare more models, and test review policies that decide when human adjudication is
+worth the cost.
+
+For now, the safe conclusion is narrower and more useful: annotation strategy selection is an
+empirical budget-allocation problem. Learning curves and Pareto frontiers make that problem visible
+before a team spends its labeling budget.

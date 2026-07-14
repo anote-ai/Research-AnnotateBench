@@ -1,0 +1,128 @@
+\begin{thebibliography}{19}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Casanueva et~al.(2020)Casanueva, Temcinas, Gerz, Henderson, and
+  Vulic]{casanueva2020efficient}
+Inigo Casanueva, Tadas Temcinas, Daniela Gerz, Matthew Henderson, and Ivan
+  Vulic.
+\newblock Efficient intent detection with dual sentence encoders.
+\newblock \emph{arXiv preprint arXiv:2003.04807}, 2020.
+
+\bibitem[Chen et~al.(2023)Chen, Karger, and Madden]{chen2023dataacquisition}
+Yihan Chen, David~R. Karger, and Samuel Madden.
+\newblock Data acquisition: A new frontier in data-centric ai.
+\newblock \emph{arXiv preprint arXiv:2311.13712}, 2023.
+
+\bibitem[Gadre et~al.(2023)Gadre, Ilharco, Fang, Hayase, Smyrnis, Nguyen,
+  Marten, Wortsman, Ghosh, Zhang, Orgad, Entezari, Darrell, Farhadi, Shankar,
+  and Schmidt]{gadre2023datacomp}
+Samir~Yitzhak Gadre, Gabriel Ilharco, Alex Fang, Jonathan Hayase, Georgios
+  Smyrnis, Thao Nguyen, Robert Marten, Mitchell Wortsman, Dhruba Ghosh, Jieyu
+  Zhang, Eyal Orgad, Rahim Entezari, Trevor Darrell, Ali Farhadi, Vaishaal
+  Shankar, and Ludwig Schmidt.
+\newblock Datacomp: In search of the next generation of multimodal datasets.
+\newblock \emph{arXiv preprint arXiv:2304.14108}, 2023.
+
+\bibitem[Gilardi et~al.(2023)Gilardi, Alizadeh, and Kubli]{gilardi2023chatgpt}
+Fabrizio Gilardi, Meysam Alizadeh, and Mael Kubli.
+\newblock Chatgpt outperforms crowd workers for text-annotation tasks.
+\newblock \emph{Proceedings of the National Academy of Sciences}, 120\penalty0
+  (30):\penalty0 e2305016120, 2023.
+
+\bibitem[Jiang et~al.(2023)Jiang, Liang, Zou, and Kwon]{jiang2023opendataval}
+Kevin~Fu Jiang, Weixin Liang, James Zou, and Yongchan Kwon.
+\newblock Opendataval: A unified benchmark for data valuation.
+\newblock \emph{arXiv preprint arXiv:2306.10577}, 2023.
+
+\bibitem[Kasner et~al.(2025)]{kasner2025spanannotators}
+Zdenek Kasner et~al.
+\newblock Llms as span annotators: A case study on long-form narrative texts.
+\newblock \emph{arXiv preprint arXiv:2504.08697}, 2025.
+
+\bibitem[Kuzman and Ljubesic(2024)]{kuzman2024teacherstudent}
+Taja Kuzman and Nikola Ljubesic.
+\newblock Llm teacher-student framework for text classification with no
+  manually annotated data: A case study in iptc news topic classification.
+\newblock \emph{arXiv preprint arXiv:2411.19638}, 2024.
+
+\bibitem[Li and Roth(2002)]{li2002learning}
+Xin Li and Dan Roth.
+\newblock Learning question classifiers.
+\newblock In \emph{Proceedings of the 19th International Conference on
+  Computational Linguistics}, pages 1--7, 2002.
+
+\bibitem[Malo et~al.(2014)Malo, Sinha, Korhonen, Wallenius, and
+  Takala]{malo2014good}
+Pekka Malo, Ankur Sinha, Pekka Korhonen, Jyrki Wallenius, and Pyry Takala.
+\newblock Good debt or bad debt: Detecting semantic orientations in economic
+  texts.
+\newblock \emph{Journal of the Association for Information Science and
+  Technology}, 65\penalty0 (4):\penalty0 782--796, 2014.
+
+\bibitem[Mazumder et~al.(2022)]{mazumder2022dataperf}
+Mark Mazumder et~al.
+\newblock Dataperf: Benchmarks for data-centric ai development.
+\newblock \emph{arXiv preprint arXiv:2207.10062}, 2022.
+
+\bibitem[Pangakis and Wolken(2024)]{pangakis2024distillation}
+Nicholas Pangakis and Samuel Wolken.
+\newblock Knowledge distillation in automated annotation: Supervised text
+  classification with llm-generated training labels.
+\newblock \emph{arXiv preprint arXiv:2406.17633}, 2024.
+
+\bibitem[Rouzegar and Makrehchi(2024)]{rouzegar2024llmdriven}
+Hamidreza Rouzegar and Masoud Makrehchi.
+\newblock Enhancing text classification through llm-driven active learning and
+  human annotation.
+\newblock \emph{arXiv preprint arXiv:2406.12114}, 2024.
+
+\bibitem[Schoch et~al.(2023)Schoch, Xu, and Ji]{schoch2023dataselection}
+Stephanie Schoch, Haifeng Xu, and Yangfeng Ji.
+\newblock Data selection for fine-tuning large language models using
+  transferred shapley values.
+\newblock \emph{arXiv preprint arXiv:2306.10165}, 2023.
+
+\bibitem[Swayamdipta et~al.(2020)Swayamdipta, Schwartz, Lourie, Wang,
+  Hajishirzi, Smith, and Choi]{swayamdipta2020dataset}
+Swabha Swayamdipta, Roy Schwartz, Nicholas Lourie, Yizhong Wang, Hannaneh
+  Hajishirzi, Noah~A. Smith, and Yejin Choi.
+\newblock Dataset cartography: Mapping and diagnosing datasets with training
+  dynamics.
+\newblock In \emph{Proceedings of the 2020 Conference on Empirical Methods in
+  Natural Language Processing}, pages 9275--9293, 2020.
+
+\bibitem[Tan et~al.(2024)]{tan2024llmannotation}
+Zhen Tan et~al.
+\newblock Large language models for data annotation and synthesis: A survey.
+\newblock \emph{arXiv preprint arXiv:2402.13446}, 2024.
+
+\bibitem[Tseng et~al.(2025)]{tseng2025expertannotators}
+Yuan Tseng et~al.
+\newblock Evaluating large language models as expert annotators.
+\newblock \emph{arXiv preprint arXiv:2508.07827}, 2025.
+
+\bibitem[Tunstall et~al.(2022)Tunstall, Reimers, Jo, Bates, Korat, Wasserblat,
+  and Pereg]{tunstall2022setfit}
+Lewis Tunstall, Nils Reimers, Unso Eun~Seo Jo, Luke Bates, Daniel Korat, Moshe
+  Wasserblat, and Oren Pereg.
+\newblock Efficient few-shot learning without prompts.
+\newblock \emph{arXiv preprint arXiv:2209.11055}, 2022.
+
+\bibitem[Vidra et~al.(2024)Vidra, Clifford, Jijo, Chung, and
+  Zhang]{vidra2024humanfeedback}
+Natan Vidra, Thomas Clifford, Katherine Jijo, Eden Chung, and Liang Zhang.
+\newblock Improving classification performance with human feedback: Label a
+  few, we label the rest.
+\newblock \emph{arXiv preprint arXiv:2401.09555}, 2024.
+
+\bibitem[Wang et~al.(2021)Wang, Liu, Xu, Zhu, and Zeng]{wang2021gpt3labeling}
+Shuohang Wang, Yang Liu, Yichong Xu, Chenguang Zhu, and Michael Zeng.
+\newblock Want to reduce labeling cost? {GPT}-3 can help.
+\newblock In \emph{Findings of the Association for Computational Linguistics:
+  EMNLP 2021}, pages 4195--4205, 2021.
+
+\end{thebibliography}

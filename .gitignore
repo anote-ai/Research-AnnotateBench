@@ -15,6 +15,9 @@ results/artifact_smoke/
 results/annotation_runs/
 figures/artifact_smoke/
 *.aux
+*.blg
+*.fdb_latexmk
+*.fls
 *.log
 *.out
 *.toc

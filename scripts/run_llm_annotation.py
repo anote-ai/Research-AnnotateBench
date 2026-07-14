@@ -124,7 +124,14 @@ def write_summary(
     if not gold_labels:
         raise ValueError("Cannot summarize an empty annotation run.")
     correctness = [gold == predicted for gold, predicted in zip(gold_labels, predicted_labels)]
-    macro_f1 = f1_score(gold_labels, predicted_labels, labels=label_names, average="macro")
+    metric_labels = label_names + sorted(set(predicted_labels).difference(label_names))
+    macro_f1 = f1_score(
+        gold_labels,
+        predicted_labels,
+        labels=metric_labels,
+        average="macro",
+        zero_division=0,
+    )
     ece = expected_calibration_error(confidences, correctness)
     confusion = {
         gold: {
@@ -133,9 +140,9 @@ def write_summary(
                 for gold_label, predicted_label in zip(gold_labels, predicted_labels)
                 if gold_label == gold and predicted_label == predicted
             )
-            for predicted in label_names
+            for predicted in metric_labels
         }
-        for gold in label_names
+        for gold in metric_labels
     }
     row = {
         "dataset_name": dataset_name,

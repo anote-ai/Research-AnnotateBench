@@ -1,5 +1,6 @@
 \documentclass[11pt]{article}
 
+\usepackage{amsmath}
 \usepackage[margin=1in]{geometry}
 \usepackage{booktabs}
 \usepackage{graphicx}
@@ -7,7 +8,7 @@
 \usepackage{natbib}
 \usepackage{tabularx}
 
-\title{AnnotateBench: How Much Labeled Data Do Annotation Strategies Need Across NLP Tasks?}
+\title{AnnotateBench: How Much Labeled Data Do Text-Classification Annotation Strategies Need?}
 \author{Anote AI}
 \date{Rough JDSE 2026 Draft}
 
@@ -15,11 +16,11 @@
 \maketitle
 
 \begin{abstract}
-Annotation budgets are a practical bottleneck in applied natural language processing, yet teams often choose labeling strategies without direct evidence about expected accuracy gains, diminishing returns, or cost tradeoffs. We introduce AnnotateBench, a benchmark framework for comparing annotation strategies through downstream learning curves, cost-performance frontiers, and budget recommendations. The current JDSE 2026 rough draft focuses on public gold-labeled text-classification datasets rather than newly collected human annotations. In the gold-label benchmark, annotation is simulated by revealing labels from the training split according to each selection strategy. The implementation targets a ten-dataset classification suite spanning financial sentiment, question classification, banking intent, news/topic classification, review sentiment, social-media sentiment, and emotion classification. We compare random sampling, uncertainty-based active learning, diversity-based active learning, and a hybrid strategy using a common TF-IDF logistic-regression classifier, and add an API-backed LLM annotator path that labels selected training examples before fitting the same downstream model. The intended contribution is not a final leaderboard, but a reproducible empirical scaffold for measuring how many labeled examples are needed to reach strong downstream performance under different annotation strategies.
+Annotation budgets are a practical bottleneck in applied natural language processing, yet teams often choose labeling strategies without direct evidence about expected accuracy gains, diminishing returns, or cost tradeoffs. We introduce AnnotateBench, a benchmark framework for comparing text-classification annotation strategies through downstream learning curves, cost-performance frontiers, and budget recommendations. The current JDSE 2026 rough draft focuses on public gold-labeled text-classification datasets rather than newly collected human annotations. In the gold-label benchmark, annotation is simulated by revealing labels from the training split according to each selection strategy. The implementation targets a ten-dataset classification suite spanning financial sentiment, question classification, banking intent, news/topic classification, review sentiment, social-media sentiment, and emotion classification. We compare random sampling, uncertainty-based active learning, diversity-based active learning, and a hybrid strategy using a common TF-IDF logistic-regression classifier, and add a seed-0 API-backed LLM annotator extension that labels selected training examples before fitting the same downstream model. The intended contribution is not a final leaderboard or a complete LLM reliability benchmark, but a reproducible empirical scaffold for measuring how many labeled examples are needed to reach strong downstream performance under different annotation strategies.
 \end{abstract}
 
 \paragraph{Scope note.}
-This manuscript is a pilot paper for annotation strategy selection in text classification. It is not the full LLM annotation reliability benchmark described in the repository design document. LLM confidence, ECE, and LARI are used as diagnostics for the LLM annotator strategy rather than as the central contribution. The paper does not claim measured results for NER, QA, summarization, or relation extraction, which require task-specific data structures, annotation units, and metrics.
+This manuscript is a benchmark paper for annotation strategy selection in text classification. It is not the full LLM annotation reliability benchmark described in the repository design document, which remains a long-term research plan. LLM confidence, ECE, and LARI are used as diagnostics for the seed-0 LLM annotator extension and small row-level pilots rather than as the central contribution. The paper does not claim measured results for NER, QA, summarization, or relation extraction, which require task-specific data structures, annotation units, and metrics.
 
 \section{Introduction}
 
@@ -29,7 +30,7 @@ AnnotateBench addresses the following question: how do different annotation stra
 
 The paper is motivated by prior Anote work showing that labeling a small number of high-value examples can improve classification performance across datasets such as Financial PhraseBank, Banking, Craigslist, TREC, and Amazon Reviews \citep{vidra2024humanfeedback}. AnnotateBench extends that idea into a systematic benchmark across annotation strategies, datasets, label budgets, and cost-performance tradeoffs. The first implementation intentionally uses public datasets with existing gold labels and simulates annotation budgets by subsampling labeled training examples selected by each strategy. This design avoids new human-subject data collection while preserving the core experimental question: which examples would an annotation process choose under a fixed budget, and what downstream model quality would those labels support?
 
-This draft targets JDSE 2026 and should be read as a text-classification benchmark manuscript. Its immediate measured scope is public text-classification datasets, five label budgets, four gold-label selection strategies, a TF-IDF logistic-regression downstream model, and publicly calibrated annotation cost assumptions. The implementation also supports an LLM annotator strategy in which selected training examples are labeled by an OpenAI model, then used to train the same downstream classifier. The full benchmark will extend this grid to stronger models, more repetitions, measured annotation costs, and broader LLM-assisted annotation baselines.
+This draft targets JDSE 2026 and should be read as a text-classification benchmark manuscript. Its measured scope is public text-classification datasets, five label budgets, four gold-label selection strategies, a TF-IDF logistic-regression downstream model, and publicly calibrated human-annotation cost assumptions. The implementation also includes a seed-0 LLM annotator extension in which selected training examples are labeled by an OpenAI model, then used to train the same downstream classifier. Future work will extend this grid to stronger models, more repetitions, measured annotation costs, and broader LLM-assisted annotation baselines.
 
 \section{Related Work}
 
@@ -151,6 +152,8 @@ The expected benchmark artifacts are:
   \item \texttt{results/benchmark\_best\_overall.csv} and \texttt{results/benchmark\_best\_by\_strategy.csv}: compact summary tables derived from the base cost scenario.
   \item \texttt{results/paper\_core\_summary.csv}: paper-ready best strategy-budget table generated from the row-level benchmark results.
   \item \texttt{results/budget\_recommendations.csv}: cheapest strategy-budget pairs for target macro F1 thresholds under the base cost scenario.
+  \item \texttt{results/statistical\_appendix.csv} and \texttt{results/statistical\_significance.csv}: aggregate diagnostics for the row-level LLM reliability pilots.
+  \item \texttt{results/benchmark\_results\_sentence\_transformer\_logreg.csv}: optional downstream-model robustness results, reported as exploratory support rather than as the primary benchmark.
   \item \texttt{figures/learning\_curve\_*.png} and \texttt{figures/pareto\_*.png}: learning curves and base-scenario cost frontiers generated from the public gold-label reveal simulation results for each benchmark dataset.
 \end{itemize}
 
@@ -185,7 +188,7 @@ The budget recommendation table in \texttt{results/budget\_recommendations.csv} 
 These results support the benchmark framing rather than a universal strategy claim. Active-learning variants help on some datasets, especially Financial PhraseBank, TREC, and Yelp Polarity, but random sampling remains competitive or best on several topic and intent datasets. This matters for annotation planning: strategy choice should be evaluated jointly with dataset, label budget, model family, and cost assumptions rather than selected by default.
 
 \paragraph{LLM annotator extension.}
-We also ran a seed-0 API-backed LLM annotator strategy for all ten datasets at budgets 50, 100, and 250. This strategy uses random budget selection, asks \texttt{gpt-4o-mini} to label the selected training examples with confidence scores, trains the same TF-IDF logistic-regression classifier on the generated labels, and evaluates on the gold test set. Table~\ref{tab:llm-annotator-250} reports the 250-label point. The results show that LLM label quality and downstream label efficiency are related but not identical. On Financial PhraseBank and Yelp Polarity, LLM labels are highly accurate and downstream performance approaches or exceeds the best matching gold-label strategy. On high-cardinality or schema-sensitive datasets such as Banking77, Emotion, and 20 Newsgroups, the LLM annotations are substantially less useful for training the downstream classifier at this budget.
+We also ran a seed-0 API-backed LLM annotator strategy for all ten datasets at budgets 50, 100, and 250. This strategy uses random budget selection, asks \texttt{gpt-4o-mini} to label the selected training examples with confidence scores, trains the same TF-IDF logistic-regression classifier on the generated labels, and evaluates on the gold test set. Table~\ref{tab:llm-annotator-250} reports the 250-label point. The results show that LLM label quality and downstream label efficiency are related but not identical. On Financial PhraseBank and Yelp Polarity, LLM labels are highly accurate and downstream performance approaches or exceeds the best matching gold-label strategy. On high-cardinality or schema-sensitive datasets such as Banking77, Emotion, and 20 Newsgroups, the LLM annotations are substantially less useful for training the downstream classifier at this budget. Because these seed-0 LLM rows currently use zero-estimate API cost placeholders, they are not included in the human-label cost Pareto frontiers.
 
 \begin{table}[h]
 \centering
@@ -210,7 +213,10 @@ Yelp Polarity & 0.681 & 0.639 & 0.042 & 0.972 & 0.891 \\
 \end{tabular}
 \end{table}
 
-We further ran a row-level reliability pilot on Financial PhraseBank, TREC, and TweetEval Sentiment. Each pilot annotated 100 held-out test examples with \texttt{gpt-4o-mini} at temperatures 0 and 0.7, with three replicates per temperature, for 600 annotations per dataset. Financial PhraseBank is the high-agreement case, with 0.990 accuracy, 0.987 macro F1, ECE 0.161, and LARI 0.828; all six errors are positive examples predicted as neutral. TREC is harder under the same design, with 0.792 accuracy, 0.674 macro F1, ECE 0.084, and LARI 0.617. TweetEval Sentiment falls between them, with 0.782 accuracy, 0.766 macro F1, ECE 0.026, and LARI 0.745, and most errors soften negative or positive tweets into the neutral class. Pairwise temperature and replicate comparisons are not significant after Bonferroni correction in all three pilots. These row-level pilots are diagnostic case studies rather than a full LLM reliability benchmark.
+We further ran a row-level reliability pilot on Financial PhraseBank, TREC, and TweetEval Sentiment. Each pilot annotated 100 held-out test examples with \texttt{gpt-4o-mini} at temperatures 0 and 0.7, with three replicates per temperature, for 600 annotations per dataset. Financial PhraseBank is the high-agreement case, with 0.990 accuracy, 0.987 macro F1, ECE 0.161, and LARI 0.828; all six errors are positive examples predicted as neutral. TREC is harder under the same design, with 0.792 accuracy, 0.562 macro F1, ECE 0.084, and LARI 0.514 when schema-external predictions such as \texttt{ABBR} are counted as predicted labels. TweetEval Sentiment falls between them, with 0.782 accuracy, 0.766 macro F1, ECE 0.026, and LARI 0.745, and most errors soften negative or positive tweets into the neutral class. Pairwise temperature and replicate comparisons are not significant after Bonferroni correction in all three pilots. These row-level pilots are diagnostic case studies rather than a full LLM reliability benchmark.
+
+\paragraph{Downstream-model robustness.}
+As an exploratory robustness check, we also ran the ten-dataset gold-label benchmark with sentence-transformer embeddings followed by logistic regression. This stronger representation improves the best macro F1 on eight datasets, with especially large gains on 20 Newsgroups, Emotion, TweetEval Sentiment, and Banking77, but it underperforms the TF-IDF setup on TREC and is roughly tied on Yelp Polarity. These results reinforce the benchmark framing: annotation strategy choice should be interpreted jointly with the downstream model, and the TF-IDF results should be read as the primary controlled baseline rather than as an upper bound on achievable performance.
 
 \begin{figure}[h]
 \centering
@@ -250,8 +256,8 @@ The next manuscript milestone is to add measured LLM annotation evidence and bro
 
 \begin{itemize}
   \item calibrate human annotation and LLM annotation cost assumptions against external pricing sources;
-  \item run the full ten-dataset API-backed LLM annotator grid and merge it with the gold-label benchmark table;
-  \item use measured LLM confidence scores to report ECE and LARI as diagnostics for the LLM annotator strategy;
+  \item expand the seed-0 API-backed LLM annotator grid to multiple seeds with measured API costs;
+  \item use measured LLM confidence scores to report ECE and LARI as diagnostics for additional LLM annotator strategies;
   \item code a sample of incorrect LLM annotations using the failure taxonomy and report inter-rater agreement;
   \item prototype a review-rate threshold policy only after measured LARI/confidence data exists;
   \item compare against at least one stronger downstream learner;
@@ -261,7 +267,7 @@ The next manuscript milestone is to add measured LLM annotation evidence and bro
 
 \section{Conclusion}
 
-AnnotateBench frames annotation strategy selection as an empirical budget-allocation problem. Instead of asking only which model achieves the highest score, it asks how performance improves as labels are revealed and which strategy-budget combinations are cost-efficient. The current JDSE 2026 draft establishes the paper structure, methodology, novelty positioning, and ten-dataset classification evidence needed to turn the repository's experiment outputs into a complete benchmark paper.
+AnnotateBench frames text-classification annotation strategy selection as an empirical budget-allocation problem. Instead of asking only which model achieves the highest score, it asks how performance improves as labels are revealed and which strategy-budget combinations are cost-efficient. The current JDSE 2026 draft establishes the methodology, novelty positioning, and ten-dataset classification evidence for this benchmark, while leaving the broader multi-task LLM reliability benchmark as future work.
 
 \bibliographystyle{plainnat}
 \bibliography{references}

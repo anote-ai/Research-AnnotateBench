@@ -2,9 +2,10 @@
 
 This document is the reproducibility entrypoint for reviewers. It describes the
 current release artifact honestly: the repository supports the public
-text-classification benchmark, LLM row-level annotation runs, and statistical
-appendix generation, but it is not yet a public human-subjects annotation
-release.
+text-classification benchmark, a seed-0 LLM annotator extension, aggregate
+row-level reliability pilot diagnostics, and statistical appendix generation,
+but it is not yet a public human-subjects annotation release or the full
+multi-task LLM reliability benchmark.
 
 ## Quick Validation
 
@@ -76,11 +77,15 @@ python scripts/run_llm_strategy_benchmark.py \
   --output-csv results/benchmark_results_with_llm.csv
 ```
 
-Generate statistical appendix files from row-level annotations:
+Generate statistical appendix files from row-level annotations. The checked-in combined appendix
+summarizes Financial PhraseBank, TREC, and TweetEval Sentiment pilots; local row-level CSVs are
+ignored by git because they can include raw API responses.
 
 ```bash
 python scripts/make_statistical_appendix.py \
-  --annotations results/llm_annotations/*.csv \
+  --annotations results/annotation_runs/financial_phrasebank_rowlevel.csv \
+    results/annotation_runs/trec_rowlevel_complete.csv \
+    results/annotation_runs/tweet_eval_sentiment_rowlevel.csv \
   --output-csv results/statistical_appendix.csv \
   --significance-csv results/statistical_significance.csv
 ```
@@ -96,11 +101,20 @@ python scripts/make_statistical_appendix.py \
 - `scripts/make_statistical_appendix.py`: confidence intervals, agreement, and
   significance tables from row-level annotations.
 - `scripts/validate_benchmark_results.py`: benchmark grid sanity checks.
+- `results/statistical_appendix.csv` and `results/statistical_significance.csv`:
+  aggregate diagnostics for the current three-dataset row-level reliability pilots.
 
-## Release Blockers Before Closing #14
+## Internal Handoff vs. Public Release
 
-These items require external decisions or measured data and are not completed by
-the current artifact scaffold:
+For an internal handoff to Natan, the current artifact package is technically ready once the
+tracked paper, aggregate result files, and documentation updates are reviewed. The repository
+license, public dataset release, and human-subjects documentation can remain deferred until the
+team decides to publish or submit the work externally.
+
+## Public Release Blockers Before Closing #14
+
+These items require external decisions or measured data before a public release or formal
+submission, and are not completed by the current artifact scaffold:
 
 - choose and add the repository license;
 - tag the exact paper-submission commit;

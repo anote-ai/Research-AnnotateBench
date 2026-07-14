@@ -27,6 +27,15 @@ strategy. It is generated separately by `scripts/run_llm_strategy_benchmark.py` 
 LLM annotator grid for budgets 50, 100, and 250. `llm_strategy_seed0_summary.csv` compares those
 rows against the best matching gold-label strategy from `benchmark_results.csv`.
 
+`statistical_appendix.csv` and `statistical_significance.csv` are the combined aggregate outputs
+for the current row-level LLM reliability pilots on Financial PhraseBank, TREC, and TweetEval
+Sentiment. The per-dataset appendix/significance files are retained for traceability.
+
+`benchmark_results_sentence_transformer_logreg.csv` and the
+`downstream_model_comparison_*.csv` files contain the measured sentence-transformer + logistic
+regression robustness check. Treat these as sensitivity-analysis artifacts; the primary benchmark
+table uses `benchmark_results.csv`.
+
 The older `pilot_results*.csv` files are retained as per-dataset pilot outputs for the original
 three-dataset run. Prefer `benchmark_results.csv` for paper tables and figures.
 
@@ -53,7 +62,9 @@ Current benchmark columns:
 | total_cost | estimated total cost |
 
 LLM strategy outputs use the same core columns and may additionally include `llm_label_accuracy`,
-`llm_label_macro_f1`, `llm_ece`, `llm_lari`, `model_name`, and `prompt_version`.
+`llm_label_macro_f1`, `llm_ece`, `llm_lari`, `model_name`, and `prompt_version`. Current
+seed-0 LLM strategy rows use zero-estimate cost placeholders and should not be included in the
+human-label Pareto frontier.
 
 Paper core summary columns:
 
@@ -80,10 +91,12 @@ LLM summary columns:
 | llm_label_accuracy | agreement between LLM labels and gold labels on the selected training examples |
 | llm_lari | calibration-adjusted LLM label quality diagnostic |
 
-## Future Reliability Results Schema
+## Reliability Results Schema
 
-For the LLM annotation reliability track in `DESIGN_DOC.md`, write measured CSVs here using a
-schema that can support ECE, LARI, failure coding, and review-rate experiments.
+For the LLM annotation reliability track in `DESIGN_DOC.md`, measured row-level CSVs should use a
+schema that can support ECE, LARI, failure coding, and review-rate experiments. The current release
+includes aggregate pilot outputs; local row-level runs are ignored by git because they may include
+raw API responses.
 
 Minimum aggregate schema for measured experiment summaries:
 
