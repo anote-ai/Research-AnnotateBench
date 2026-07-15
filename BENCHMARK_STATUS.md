@@ -58,13 +58,16 @@ Implemented:
 - `results/llm_strategy_seed0_summary.csv`, `results/llm_strategy_seed1_2_summary.csv`, and
   `results/llm_strategy_seed0_1_2_summary.csv` compare those LLM rows against the best matching
   gold-label strategy.
+- `results/llm_api_cost_seed1_2_summary.csv` summarizes recorded seed-1 and seed-2 API token usage
+  and estimated `gpt-4o-mini` cost as an auxiliary analysis. The seed-0 run predates the complete
+  token-logging schema, so LLM rows are still excluded from the main human-label Pareto frontiers.
 - `results/statistical_appendix.csv` and `results/statistical_significance.csv` contain combined
   aggregate diagnostics for the Financial PhraseBank, TREC, and TweetEval Sentiment row-level
   reliability pilots.
 
 Still not claimed as complete:
 
-- Measured API cost frontiers for the LLM annotator rows.
+- Measured API cost frontiers for the full seed-0/1/2 LLM annotator grid.
 - Cross-model agreement.
 - Failure-taxonomy coding of real LLM errors.
 - Human adjudication or review-rate optimization.
