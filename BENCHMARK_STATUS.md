@@ -54,14 +54,16 @@ Implemented:
 - `scripts/run_llm_annotation.py` supports row-level LLM annotations for the ten benchmark datasets.
 - `scripts/run_llm_strategy_benchmark.py` emits benchmark-style `llm_annotator` rows by training the shared downstream classifier on LLM-generated labels.
 - `results/benchmark_results_with_llm_seed0_all_datasets.csv` contains a ten-dataset seed-0 LLM annotator grid for budgets 50, 100, and 250.
-- `results/llm_strategy_seed0_summary.csv` compares those LLM rows against the best matching gold-label strategy.
+- `results/benchmark_results_with_llm_seed1_2_all_datasets.csv` contains the matching seed-1 and seed-2 LLM annotator grid.
+- `results/llm_strategy_seed0_summary.csv`, `results/llm_strategy_seed1_2_summary.csv`, and
+  `results/llm_strategy_seed0_1_2_summary.csv` compare those LLM rows against the best matching
+  gold-label strategy.
 - `results/statistical_appendix.csv` and `results/statistical_significance.csv` contain combined
   aggregate diagnostics for the Financial PhraseBank, TREC, and TweetEval Sentiment row-level
   reliability pilots.
 
 Still not claimed as complete:
 
-- Multi-seed API-backed `llm_annotator` grid.
 - Measured API cost frontiers for the LLM annotator rows.
 - Cross-model agreement.
 - Failure-taxonomy coding of real LLM errors.

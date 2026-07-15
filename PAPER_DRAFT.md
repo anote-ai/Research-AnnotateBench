@@ -1,6 +1,6 @@
 # AnnotateBench Paper Draft Skeleton
 
-Status: ten-dataset classification benchmark draft; seed-0 ten-dataset LLM annotator strategy
+Status: ten-dataset classification benchmark draft; seed-0/1/2 ten-dataset LLM annotator strategy
 results added; full LLM reliability benchmark is not complete.
 
 This skeleton maps the current repository to the larger research plan in `DESIGN_DOC.md`.
@@ -13,7 +13,7 @@ AnnotateBench currently supports a learning-curve and cost-frontier framework fo
 strategy selection. The current branch includes a real ten-dataset public text-classification
 benchmark that simulates annotation by revealing existing gold labels.
 
-The repository now contains an API-backed LLM annotator runner and a seed-0 ten-dataset
+The repository now contains an API-backed LLM annotator runner and a seed-0/1/2 ten-dataset
 `llm_annotator` result grid. It does not yet contain a completed LLM annotation reliability
 benchmark, human adjudication, calibrated review policies, or a coded failure-taxonomy study.
 
@@ -29,9 +29,10 @@ benchmark, human adjudication, calibrated review policies, or a coded failure-ta
 - Ten-dataset benchmark outputs in `results/benchmark_results.csv`,
   `results/budget_recommendations.csv`, `results/benchmark_best_*.csv`,
   `results/paper_core_summary.csv`, and `figures/*.png`.
-- Seed-0 ten-dataset LLM annotator strategy outputs in
-  `results/benchmark_results_with_llm_seed0_all_datasets.csv` and
-  `results/llm_strategy_seed0_summary.csv`.
+- Seed-0/1/2 ten-dataset LLM annotator strategy outputs in
+  `results/benchmark_results_with_llm_seed0_all_datasets.csv`,
+  `results/benchmark_results_with_llm_seed1_2_all_datasets.csv`, and
+  `results/llm_strategy_seed0_1_2_summary.csv`.
 - Benchmark validation in `scripts/validate_benchmark_results.py`.
 - Paper summary generation in `scripts/make_paper_summary_table.py`.
 - Optional downstream-model comparison support for `sentence_transformer_logreg`, with measured
@@ -44,7 +45,7 @@ benchmark, human adjudication, calibrated review policies, or a coded failure-ta
 
 ## Partially Implemented
 
-- LARI exists as a diagnostic metric and is populated for the seed-0 ten-dataset LLM annotator
+- LARI exists as a diagnostic metric and is populated for the seed-0/1/2 ten-dataset LLM annotator
   strategy grid and small row-level LLM annotation runs.
 - The failure taxonomy exists as code-level categories and records, but no sample of real
   annotation failures has been coded by human reviewers.
@@ -56,8 +57,7 @@ benchmark, human adjudication, calibrated review policies, or a coded failure-ta
 ## Not Yet Implemented
 
 - 10,000-task AnnotateBench reliability dataset across the eight task types in `DESIGN_DOC.md`.
-- Multi-seed ten-dataset LLM annotator strategy run with versioned prompts, model names, measured
-  costs, and confidence scores.
+- Measured API costs for the multi-seed ten-dataset LLM annotator strategy run.
 - Human annotation or adjudication protocol for gold labels.
 - LARI heatmap by model and task type.
 - Reliability diagrams and calibration study across prompting conditions.
@@ -73,7 +73,7 @@ benchmark, human adjudication, calibrated review policies, or a coded failure-ta
    human-in-the-loop review.
 3. Method: learning-curve benchmark framework, pilot selection strategies, cost scenarios, and
    LARI/ECE definitions.
-4. Experiments: ten public-dataset text-classification results, plus the seed-0 LLM annotator
+4. Experiments: ten public-dataset text-classification results, plus the seed-0/1/2 LLM annotator
    strategy extension.
 5. Reliability extension: row-level LLM annotation pilots, clearly separated from the full future
    reliability benchmark.
@@ -98,25 +98,25 @@ the same row-level schema with:
 
 ## Draft Results Text
 
-The seed-0 LLM annotator extension evaluates `gpt-4o-mini` as a budgeted labeling strategy on all
+The seed-0/1/2 LLM annotator extension evaluates `gpt-4o-mini` as a budgeted labeling strategy on all
 ten text-classification datasets. For budgets 50, 100, and 250, the runner selects training
 examples with the random budget policy, asks the model for labels and confidence scores, trains the
 same TF-IDF logistic-regression classifier used in the gold-label benchmark, and evaluates on the
 gold test split. This makes the LLM results comparable to the gold-label strategies at the same
-dataset, budget, and seed, while keeping the result scoped to one model and one seed.
+dataset, budget, and seed, while keeping the result scoped to one model.
 
 The results show that high LLM label agreement does not always translate into equal downstream
-performance, but the two are related. At the 250-label budget, Yelp Polarity is the strongest LLM
-case: the LLM-trained classifier reaches 0.681 macro F1, slightly above the best matching
-gold-label strategy at 0.639, with 0.972 LLM label accuracy. Financial PhraseBank is close to the
-gold-label baseline, with 0.626 LLM macro F1 versus 0.642 for the best matching gold strategy and
-0.932 label accuracy. SST-2 and Rotten Tomatoes also have high LLM label accuracy, but their
+performance, but the two are related. At the 250-label budget, averaged across three seeds, Yelp
+Polarity is the strongest LLM case: the LLM-trained classifier reaches 0.675 macro F1, roughly
+matching the best gold-label strategy at 0.672, with 0.972 LLM label accuracy. Financial
+PhraseBank is close to the gold-label baseline, with 0.589 LLM macro F1 versus 0.634 for the best
+matching gold strategy and 0.929 label accuracy. SST-2 and Rotten Tomatoes also have high LLM label accuracy, but their
 downstream gaps remain larger, suggesting that label correctness alone does not fully determine
 few-shot classifier behavior.
 
 The harder cases are mostly multi-class or schema-sensitive datasets. At budget 250, TREC reaches
-0.342 macro F1 with LLM labels versus 0.496 for the best matching gold-label strategy. AG News has
-0.776 LLM label accuracy but a large downstream gap, 0.262 versus 0.547 macro F1. Banking77,
+0.338 macro F1 with LLM labels versus 0.528 for the best matching gold-label strategy. AG News has
+0.819 LLM label accuracy but a large downstream gap, 0.404 versus 0.639 macro F1. Banking77,
 Emotion, and 20 Newsgroups remain low in absolute downstream macro F1 under this simple
 TF-IDF-based setup. These patterns support treating LLM annotation as another budgeted strategy to
 measure, rather than assuming that model-generated labels are uniformly interchangeable with gold

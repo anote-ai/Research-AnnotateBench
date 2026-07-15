@@ -4,6 +4,7 @@ import json
 import ssl
 import time
 from dataclasses import dataclass
+from http.client import RemoteDisconnected
 from pathlib import Path
 from urllib import request
 from urllib.error import HTTPError, URLError
@@ -187,6 +188,10 @@ def call_chat_completion(
                 raise RuntimeError(f"API request failed with HTTP {exc.code}: {detail}") from exc
             time.sleep(retry_sleep_seconds * (2**attempt))
         except URLError as exc:
+            if attempt == attempts - 1:
+                raise RuntimeError(f"API request failed: {exc}") from exc
+            time.sleep(retry_sleep_seconds * (2**attempt))
+        except (ConnectionError, RemoteDisconnected, TimeoutError) as exc:
             if attempt == attempts - 1:
                 raise RuntimeError(f"API request failed: {exc}") from exc
             time.sleep(retry_sleep_seconds * (2**attempt))

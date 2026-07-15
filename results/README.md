@@ -23,9 +23,11 @@ benchmark outputs.
 strategy. It is generated separately by `scripts/run_llm_strategy_benchmark.py` after
 `OPENAI_API_KEY` is set in the terminal.
 
-`benchmark_results_with_llm_seed0_all_datasets.csv` contains the current ten-dataset seed-0
-LLM annotator grid for budgets 50, 100, and 250. `llm_strategy_seed0_summary.csv` compares those
-rows against the best matching gold-label strategy from `benchmark_results.csv`.
+`benchmark_results_with_llm_seed0_all_datasets.csv` contains the ten-dataset seed-0 LLM annotator
+grid for budgets 50, 100, and 250. `benchmark_results_with_llm_seed1_2_all_datasets.csv` contains
+the matching seed-1 and seed-2 grid. `llm_strategy_seed0_summary.csv`,
+`llm_strategy_seed1_2_summary.csv`, and `llm_strategy_seed0_1_2_summary.csv` compare those rows
+against the best matching gold-label strategy from `benchmark_results.csv`.
 
 `statistical_appendix.csv` and `statistical_significance.csv` are the combined aggregate outputs
 for the current row-level LLM reliability pilots on Financial PhraseBank, TREC, and TweetEval
@@ -63,7 +65,7 @@ Current benchmark columns:
 
 LLM strategy outputs use the same core columns and may additionally include `llm_label_accuracy`,
 `llm_label_macro_f1`, `llm_ece`, `llm_lari`, `model_name`, and `prompt_version`. Current
-seed-0 LLM strategy rows use zero-estimate cost placeholders and should not be included in the
+seed-0/1/2 LLM strategy rows use zero-estimate cost placeholders and should not be included in the
 human-label Pareto frontier.
 
 Paper core summary columns:

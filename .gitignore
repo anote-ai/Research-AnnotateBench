@@ -13,6 +13,8 @@ build/
 data/raw/
 results/artifact_smoke/
 results/annotation_runs/
+results/llm_annotations/
+results/*dryrun*.csv
 figures/artifact_smoke/
 *.aux
 *.blg
