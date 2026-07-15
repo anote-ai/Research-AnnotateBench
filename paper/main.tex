@@ -141,21 +141,12 @@ Each condition trains the same downstream text classifier: TF-IDF features with 
 
 The benchmark budget grid is 50, 100, 250, 500, and 1000 labeled examples, capped at the available training set size. The current draft reports three strategy-selection seeds, 0, 1, and 2. The final paper should expand this repetition, add confidence intervals, and report sensitivity to train/test split choices where feasible.
 
-\subsection{Reproducible Outputs}
+\subsection{Reproducibility}
 
-The expected benchmark artifacts are:
-
-\begin{itemize}
-  \item \path{results/benchmark_results.csv}: combined ten-dataset gold-label classification benchmark results.
-  \item {\footnotesize\path{results/benchmark_results_with_llm_seed0_all_datasets.csv}}: seed-0 API-backed LLM annotator strategy rows.
-  \item {\footnotesize\path{results/benchmark_results_with_llm_seed1_2_all_datasets.csv}}: matching seed-1 and seed-2 API-backed LLM annotator strategy rows.
-  \item \path{results/benchmark_best_overall.csv} and \path{results/benchmark_best_by_strategy.csv}: compact summary tables derived from the base cost scenario.
-  \item \path{results/paper_core_summary.csv}: paper-ready best strategy-budget table generated from the row-level benchmark results.
-  \item \path{results/budget_recommendations.csv}: cheapest strategy-budget pairs for target macro F1 thresholds under the base cost scenario.
-  \item \path{results/statistical_appendix.csv} and \path{results/statistical_significance.csv}: aggregate diagnostics for the row-level LLM reliability pilots.
-  \item \path{results/benchmark_results_sentence_transformer_logreg.csv}: optional downstream-model robustness results, reported as exploratory support rather than as the primary benchmark.
-  \item \path{figures/learning_curve_*.png} and \path{figures/pareto_*.png}: learning curves and base-scenario cost frontiers generated from the public gold-label reveal simulation results for each benchmark dataset.
-\end{itemize}
+The repository includes the benchmark runner, data-loading utilities, result-generation scripts,
+and checked-in aggregate outputs needed to reproduce the tables and figures reported here. The
+artifact guide documents the exact result files, smoke-test workflow, and claim boundaries for the
+API-backed LLM annotator extension and row-level reliability pilots.
 
 \section{Preliminary Results}
 
