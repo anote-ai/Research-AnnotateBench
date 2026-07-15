@@ -33,6 +33,8 @@ benchmark, human adjudication, calibrated review policies, or a coded failure-ta
   `results/benchmark_results_with_llm_seed0_all_datasets.csv`,
   `results/benchmark_results_with_llm_seed1_2_all_datasets.csv`, and
   `results/llm_strategy_seed0_1_2_summary.csv`.
+- Auxiliary seed-1/2 LLM API cost summary in `results/llm_api_cost_seed1_2_summary.csv`, derived
+  from recorded token usage in local row-level LLM annotation logs.
 - Benchmark validation in `scripts/validate_benchmark_results.py`.
 - Paper summary generation in `scripts/make_paper_summary_table.py`.
 - Optional downstream-model comparison support for `sentence_transformer_logreg`, with measured
@@ -53,11 +55,14 @@ benchmark, human adjudication, calibrated review policies, or a coded failure-ta
   reliability benchmark described in `DESIGN_DOC.md`.
 - The sentence-transformer comparison is measured and summarized, but should be presented as
   exploratory robustness evidence rather than as the primary benchmark table.
+- API cost is estimated for the seed-1 and seed-2 LLM annotator logs with recorded token usage.
+  The seed-0 run predates the complete token-logging schema, so LLM cost is an auxiliary analysis
+  rather than part of the main Pareto frontier.
 
 ## Not Yet Implemented
 
 - 10,000-task AnnotateBench reliability dataset across the eight task types in `DESIGN_DOC.md`.
-- Measured API costs for the multi-seed ten-dataset LLM annotator strategy run.
+- Full seed-0/1/2 measured API cost frontiers for the ten-dataset LLM annotator strategy run.
 - Human annotation or adjudication protocol for gold labels.
 - LARI heatmap by model and task type.
 - Reliability diagrams and calibration study across prompting conditions.

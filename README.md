@@ -40,7 +40,9 @@ datasets x 4 selection strategies x 5 budget levels x 3 seeds x 3 cost
 scenarios. A separate seed-0/1/2 `llm_annotator` extension covers the same 10
 datasets at budgets 50, 100, and 250 by labeling selected training examples
 with an OpenAI model and training the same downstream classifier on those
-model-generated labels.
+model-generated labels. The seed-1 and seed-2 row-level LLM logs also support
+an auxiliary recorded-token API cost estimate in
+`results/llm_api_cost_seed1_2_summary.csv`.
 
 **Measured datasets:** Financial PhraseBank, TREC, Banking77, AG News, SST-2, 20 Newsgroups, Rotten Tomatoes, Yelp Polarity, TweetEval Sentiment, and Emotion.
 
@@ -250,6 +252,17 @@ left as zero-estimate placeholders. The LLM strategy runner uses nested random b
 dataset/seed and resumes from a shared row-level CSV in `results/llm_annotations/` by default, so
 interrupted runs do not re-call the API for examples already written to disk. Pass `--no-resume`
 only when you intentionally want to refresh all annotations.
+
+The checked-in auxiliary LLM API cost summary is generated from the recorded seed-1 and seed-2
+row-level token logs:
+
+```bash
+python scripts/make_llm_api_cost_summary.py
+```
+
+This writes `results/llm_api_cost_seed1_2_summary.csv`. The seed-0 LLM strategy run predates the
+complete token-logging schema, so the summary is reported as an auxiliary cost analysis rather
+than as part of the main human-label Pareto frontiers.
 
 ## Venue
 

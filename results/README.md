@@ -29,6 +29,12 @@ the matching seed-1 and seed-2 grid. `llm_strategy_seed0_summary.csv`,
 `llm_strategy_seed1_2_summary.csv`, and `llm_strategy_seed0_1_2_summary.csv` compare those rows
 against the best matching gold-label strategy from `benchmark_results.csv`.
 
+`llm_api_cost_seed1_2_summary.csv` is an auxiliary API-cost summary derived from recorded row-level
+token usage in local `results/llm_annotations/*seed1.csv` and `*seed2.csv` logs. It uses the
+published `gpt-4o-mini` prices checked on 2024-07-18 ($0.15 per 1M input tokens and $0.60 per
+1M output tokens). The seed-0 LLM strategy run predates the complete token-logging schema, so this
+cost summary is not used to place LLM rows on the main human-label Pareto frontiers.
+
 `statistical_appendix.csv` and `statistical_significance.csv` are the combined aggregate outputs
 for the current row-level LLM reliability pilots on Financial PhraseBank, TREC, and TweetEval
 Sentiment. The per-dataset appendix/significance files are retained for traceability.
@@ -65,8 +71,9 @@ Current benchmark columns:
 
 LLM strategy outputs use the same core columns and may additionally include `llm_label_accuracy`,
 `llm_label_macro_f1`, `llm_ece`, `llm_lari`, `model_name`, and `prompt_version`. Current
-seed-0/1/2 LLM strategy rows use zero-estimate cost placeholders and should not be included in the
-human-label Pareto frontier.
+seed-0/1/2 LLM strategy rows use zero-estimate cost placeholders in the benchmark-style result
+files. Use `llm_api_cost_seed1_2_summary.csv` for the auxiliary recorded-token API cost analysis;
+do not include the LLM rows in the main human-label Pareto frontier.
 
 ## Result QA Utilities
 
@@ -124,6 +131,24 @@ LLM summary columns:
 | best_gold_strategy | gold-label strategy that achieved `best_gold_macro_f1` |
 | llm_label_accuracy | agreement between LLM labels and gold labels on the selected training examples |
 | llm_lari | calibration-adjusted LLM label quality diagnostic |
+
+LLM API cost summary columns:
+
+| column | description |
+|---|---|
+| dataset | public dataset name |
+| seed | LLM annotator strategy seed with recorded token usage |
+| model_name | API model used for annotation |
+| rows_total | row-level annotation records in the local log |
+| rows_with_recorded_tokens | records with nonzero API token usage |
+| input_tokens | total recorded API input tokens |
+| output_tokens | total recorded API output tokens |
+| total_tokens | total recorded API tokens |
+| input_usd_per_million_tokens | dated input-token price used for the estimate |
+| output_usd_per_million_tokens | dated output-token price used for the estimate |
+| api_cost_usd | estimated API cost from recorded usage and dated token prices |
+| price_checked_at | date associated with the token-pricing assumption |
+| price_source_url | public source for the token prices |
 
 ## Reliability Results Schema
 

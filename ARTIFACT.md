@@ -90,6 +90,16 @@ python scripts/make_statistical_appendix.py \
   --significance-csv results/statistical_significance.csv
 ```
 
+Generate the auxiliary seed-1/2 LLM API cost summary from recorded row-level token logs:
+
+```bash
+python scripts/make_llm_api_cost_summary.py
+```
+
+This produces `results/llm_api_cost_seed1_2_summary.csv`. The seed-0 LLM strategy run predates the
+complete token-logging schema, so this cost summary is not used for the main human-label Pareto
+frontiers.
+
 ## Artifact Contents
 
 - `README.md`: installation, benchmark commands, and claim boundaries.
@@ -98,11 +108,14 @@ python scripts/make_statistical_appendix.py \
 - `scripts/run_benchmark.py`: measured gold-label benchmark runner.
 - `scripts/run_llm_annotation.py`: row-level LLM annotation runner.
 - `scripts/run_llm_strategy_benchmark.py`: LLM-as-annotator strategy runner.
+- `scripts/make_llm_api_cost_summary.py`: auxiliary API cost summary from recorded LLM token usage.
 - `scripts/make_statistical_appendix.py`: confidence intervals, agreement, and
   significance tables from row-level annotations.
 - `scripts/validate_benchmark_results.py`: benchmark grid sanity checks.
 - `results/statistical_appendix.csv` and `results/statistical_significance.csv`:
   aggregate diagnostics for the current three-dataset row-level reliability pilots.
+- `results/llm_api_cost_seed1_2_summary.csv`: auxiliary recorded-token API cost estimate for the
+  seed-1 and seed-2 LLM annotator logs.
 
 ## Internal Handoff vs. Public Release
 
