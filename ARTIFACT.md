@@ -2,7 +2,7 @@
 
 This document is the reproducibility entrypoint for reviewers. It describes the
 current release artifact honestly: the repository supports the public
-text-classification benchmark, a seed-0 LLM annotator extension, aggregate
+text-classification benchmark, a seed-0/1/2 LLM annotator extension, aggregate
 row-level reliability pilot diagnostics, and statistical appendix generation,
 but it is not yet a public human-subjects annotation release or the full
 multi-task LLM reliability benchmark.

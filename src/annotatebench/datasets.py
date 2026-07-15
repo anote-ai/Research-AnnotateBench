@@ -50,6 +50,7 @@ class HuggingFaceTextDatasetConfig:
     test_split: str = "test"
     text_columns: tuple[str, ...] = ("text",)
     label_column: str = "label"
+    label_names: tuple[str, ...] | None = None
 
 
 def load_financial_phrasebank(
@@ -142,7 +143,7 @@ def load_dbpedia_14(**kwargs) -> TextClassificationDataset:
 
 def load_sst2(**kwargs) -> TextClassificationDataset:
     return _load_huggingface_text_classification(
-        HuggingFaceTextDatasetConfig("sst2", "SetFit/sst2"),
+        HuggingFaceTextDatasetConfig("sst2", "SetFit/sst2", label_names=("negative", "positive")),
         **kwargs,
     )
 
@@ -156,14 +157,22 @@ def load_imdb(**kwargs) -> TextClassificationDataset:
 
 def load_rotten_tomatoes(**kwargs) -> TextClassificationDataset:
     return _load_huggingface_text_classification(
-        HuggingFaceTextDatasetConfig("rotten_tomatoes", "cornell-movie-review-data/rotten_tomatoes"),
+        HuggingFaceTextDatasetConfig(
+            "rotten_tomatoes",
+            "cornell-movie-review-data/rotten_tomatoes",
+            label_names=("negative", "positive"),
+        ),
         **kwargs,
     )
 
 
 def load_yelp_polarity(**kwargs) -> TextClassificationDataset:
     return _load_huggingface_text_classification(
-        HuggingFaceTextDatasetConfig("yelp_polarity", "fancyzhx/yelp_polarity"),
+        HuggingFaceTextDatasetConfig(
+            "yelp_polarity",
+            "fancyzhx/yelp_polarity",
+            label_names=("negative", "positive"),
+        ),
         **kwargs,
     )
 
@@ -397,8 +406,14 @@ def _load_huggingface_text_classification(
     except ValueError:
         test_split = load_dataset(*dataset_args, split="validation", streaming=True)
 
-    label_feature = train_split.features.get(config.label_column)
-    label_names = list(label_feature.names) if isinstance(label_feature, ClassLabel) else None
+    features = getattr(train_split, "features", None)
+    label_feature = features.get(config.label_column) if features is not None else None
+    label_names = (
+        list(label_feature.names)
+        if isinstance(label_feature, ClassLabel)
+        else list(config.label_names or [])
+    )
+    label_names = label_names or None
 
     train_split = _shuffle_and_take_hf_split(train_split, max_train_examples, seed)
     test_split = _shuffle_and_take_hf_split(test_split, max_test_examples, seed)

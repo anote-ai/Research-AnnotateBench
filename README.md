@@ -37,7 +37,7 @@ findings.
 
 The primary measured gold-label benchmark covers 10 public text-classification
 datasets x 4 selection strategies x 5 budget levels x 3 seeds x 3 cost
-scenarios. A separate seed-0 `llm_annotator` extension covers the same 10
+scenarios. A separate seed-0/1/2 `llm_annotator` extension covers the same 10
 datasets at budgets 50, 100, and 250 by labeling selected training examples
 with an OpenAI model and training the same downstream classifier on those
 model-generated labels.
@@ -184,9 +184,11 @@ dataset, budget, seed, and cost scenario:
 
 ```bash
 ./scripts/make_llm_strategy_summary.py \
-  --llm-results results/benchmark_results_with_llm_seed0_all_datasets.csv \
-  --seeds 0 \
-  --output-csv results/llm_strategy_seed0_summary.csv
+  --llm-results \
+    results/benchmark_results_with_llm_seed0_all_datasets.csv \
+    results/benchmark_results_with_llm_seed1_2_all_datasets.csv \
+  --seeds 0,1,2 \
+  --output-csv results/llm_strategy_seed0_1_2_summary.csv
 ```
 
 Run a zero-shot LLM annotation experiment with the saved Financial PhraseBank prompt:
@@ -252,9 +254,9 @@ only when you intentionally want to refresh all annotations.
 ## Venue
 
 **JDSE 2026** draft materials are in `paper/main.tex`. The submission scope is a
-text-classification annotation-strategy benchmark with a seed-0 LLM annotator extension and small
-row-level reliability pilots. The broader `DESIGN_DOC.md` LLM reliability benchmark remains future
-work.
+text-classification annotation-strategy benchmark with a seed-0/1/2 LLM annotator extension and
+small row-level reliability pilots. The broader `DESIGN_DOC.md` LLM reliability benchmark remains
+future work.
 
 ## Citation
 

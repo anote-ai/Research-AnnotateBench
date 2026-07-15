@@ -31,17 +31,17 @@ cost assumptions instead of chosen by habit.
 
 ## What The LLM Extension Shows
 
-AnnotateBench also includes a seed-0 LLM annotator extension. For all ten datasets, `gpt-4o-mini`
+AnnotateBench also includes a seed-0/1/2 LLM annotator extension. For all ten datasets, `gpt-4o-mini`
 labels randomly selected training examples at budgets 50, 100, and 250. The benchmark then trains
 the same downstream classifier on those model-generated labels and evaluates on the gold test set.
 
-At budget 250, LLM label quality and downstream utility are related but not interchangeable. Yelp
-Polarity is the strongest case: the LLM-trained classifier reaches 0.681 macro F1, slightly above
-the best matching gold-label strategy at 0.639, with 0.972 label accuracy on the selected examples.
-Financial PhraseBank is close to the gold-label strategy, with 0.626 versus 0.642 macro F1. Other
-datasets show larger gaps even when label accuracy is high, which suggests that LLM annotations
-need to be evaluated as a budgeted strategy rather than treated as automatic replacements for
-human or gold labels.
+At budget 250, averaged across the three seeds, LLM label quality and downstream utility are
+related but not interchangeable. Yelp Polarity is the strongest case: the LLM-trained classifier
+reaches 0.675 macro F1, roughly matching the best gold-label strategy at 0.672, with 0.972 label
+accuracy on the selected examples. Financial PhraseBank is close to the gold-label strategy, with
+0.589 versus 0.634 macro F1. Other datasets show larger gaps even when label accuracy is high,
+which suggests that LLM annotations need to be evaluated as a budgeted strategy rather than treated
+as automatic replacements for human or gold labels.
 
 These LLM rows currently use zero-estimate API cost placeholders, so they should not be read as
 part of the human-label Pareto frontier yet.
@@ -64,9 +64,8 @@ replace a larger multi-model, human-reviewed study.
 ## What Comes Next
 
 The next step is not to claim that LLM annotation is solved. It is to make the benchmark more
-complete: add measured API costs, expand the LLM annotator grid beyond seed 0, code real failure
-categories, compare more models, and test review policies that decide when human adjudication is
-worth the cost.
+complete: add measured API costs, code real failure categories, compare more models, and test
+review policies that decide when human adjudication is worth the cost.
 
 For now, the safe conclusion is narrower and more useful: annotation strategy selection is an
 empirical budget-allocation problem. Learning curves and Pareto frontiers make that problem visible
