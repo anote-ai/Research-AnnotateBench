@@ -85,6 +85,38 @@ five-seed gold-label grid plus the three-seed LLM grid, with measured seed-1/2 c
 stratified estimates. `llm_cost_sampling_validation.csv` records the retrospective validation;
 the selected 30-example design has 2.44% mean absolute percentage error.
 
+## Result QA Utilities
+
+Use `scripts/sanity_check_results.py` for lightweight CSV checks before making paper tables or
+figures. It validates duplicate condition keys, missing key values, metric ranges, non-negative
+costs, and optional key coverage against a baseline result file.
+
+Use `scripts/make_run_manifest.py` to record result-file provenance and coverage, including file
+hashes, row counts, columns, datasets, strategies, budgets, seeds, model identifiers, and metric
+ranges.
+
+Use `scripts/sample_failure_cases.py` to sample incorrect row-level annotation examples for
+qualitative review. It expects either a `correct` column or `gold_label`/`predicted_label` columns.
+
+Example commands:
+
+```bash
+python scripts/sanity_check_results.py \
+  --results results/benchmark_results_sentence_transformer_logreg.csv \
+  --baseline results/benchmark_results.csv \
+  --cost-scenario base \
+  --output-csv results/sanity_check_sentence_transformer_logreg.csv
+
+python scripts/make_run_manifest.py \
+  --results results/benchmark_results.csv results/benchmark_results_sentence_transformer_logreg.csv \
+  --output-csv results/run_manifest_current.csv
+
+python scripts/sample_failure_cases.py \
+  --annotations results/llm_annotations/*_llm_annotator_seed0_budget50.csv \
+  --n-per-group 5 \
+  --output-csv results/failure_case_samples_seed0_budget50.csv
+```
+
 Paper core summary columns:
 
 | column | description |

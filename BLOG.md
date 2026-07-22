@@ -7,7 +7,7 @@ AnnotateBench turns that planning choice into a benchmark question: given a fixe
 which annotation strategy produces the best downstream classifier, and where does the
 cost-performance frontier change?
 
-## TL;DR
+## Key Takeaways
 
 - No annotation strategy wins across every dataset.
 - LLM-generated labels can be useful, but high label accuracy does not always translate into the
