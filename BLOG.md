@@ -10,6 +10,8 @@ cost-performance frontier change?
 ## Key Takeaways
 
 - No annotation strategy wins across every dataset.
+- Across the ten datasets, hybrid selection ranks first on five, random and uncertainty on two
+  each, and diversity on one; several leading confidence intervals overlap.
 - LLM-generated labels can be useful, but high label accuracy does not always translate into the
   same downstream classifier performance as gold labels.
 - Cost frontiers are more useful than raw accuracy when the real decision is how to spend a
@@ -40,14 +42,16 @@ budgets 50, 100, 250, 500, and 1000.
 The primary grid compares four strategies: random sampling, uncertainty active learning, diversity
 active learning, and a hybrid active-learning strategy. Each condition trains the same TF-IDF +
 logistic-regression classifier and records macro F1, accuracy, and cost estimates. The full
-gold-label grid contains 1,800 measured rows.
+gold-label grid contains 3,000 measured rows: ten datasets, four strategies, five budgets, five
+seeds, and three human-cost scenarios.
 
 ![Pareto frontier for TREC](figures/pareto_trec.png)
 
 The headline result is not that one strategy always wins. Strategy choice is dataset-dependent.
-Financial PhraseBank and SST-2 favor uncertainty sampling in the primary table. AG News, Emotion,
-Rotten Tomatoes, TREC, TweetEval Sentiment, and Yelp Polarity favor the hybrid strategy. Banking77
-and 20 Newsgroups are strongest with random sampling under the primary TF-IDF setup.
+Financial PhraseBank and SST-2 favor uncertainty sampling; AG News, Emotion, TREC, TweetEval
+Sentiment, and Yelp Polarity favor the hybrid strategy; Banking77 and 20 Newsgroups favor random
+sampling; and Rotten Tomatoes favors diversity sampling under the primary TF-IDF setup. Several
+top-two confidence intervals overlap, so small differences should not be read as decisive wins.
 
 That variation is the point: annotation plans should be evaluated against the dataset, budget,
 model family, and cost assumptions instead of chosen by habit.
@@ -65,14 +69,18 @@ reaches 0.675 macro F1, roughly matching the best gold-label strategy at 0.672, 
 accuracy on the selected examples. Financial PhraseBank is close to the gold-label strategy, with
 0.589 versus 0.634 macro F1. Other datasets show larger gaps even when label accuracy is high.
 
-![Learning curve for Financial PhraseBank](figures/learning_curve_financial_phrasebank.png)
+![Unified cost-performance frontier for Financial PhraseBank](figures/unified_cost/pareto_financial_phrasebank.png)
 
 The practical takeaway is that LLM annotations should be evaluated as a budgeted strategy, not
 treated as automatic replacements for human or gold labels. A team should measure whether model
 labels improve its downstream system, not only whether a sample of labels looks accurate.
 
-These LLM rows currently use zero-estimate API cost placeholders, so they should not be read as
-part of the human-label Pareto frontier yet.
+The unified cost analysis uses recorded token usage for seeds 1 and 2 and a reproducible
+30-example-per-dataset length-stratified estimate for seed 0. The sampling procedure has 2.44%
+mean error when replayed against the complete seed-1/2 logs. At budget 250, the ten-dataset API
+totals are $0.220 for estimated seed 0, $0.215 for measured seed 1, and $0.218 for measured seed 2;
+mean per-dataset run cost ranges from $0.0142 to $0.0485. These prices cover API usage only, not
+human review, failed-request overhead, latency, or quality control.
 
 ## Reliability Pilots
 

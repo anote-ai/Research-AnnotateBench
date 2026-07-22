@@ -40,13 +40,24 @@ datasets x 4 selection strategies x 5 budget levels x 5 seeds x 3 cost
 scenarios. A separate seed-0/1/2 `llm_annotator` extension covers the same 10
 datasets at budgets 50, 100, and 250 by labeling selected training examples
 with an OpenAI model and training the same downstream classifier on those
-model-generated labels. The seed-1 and seed-2 row-level LLM logs also support
-an auxiliary recorded-token API cost estimate in
-`results/llm_api_cost_seed1_2_summary.csv`. The seed-0 cost workflow uses a reproducible
+model-generated labels. Seed-1 and seed-2 API costs use recorded row-level token usage, while the
+seed-0 cost workflow uses a reproducible
 30-example-per-dataset length-stratified sample; its estimator first checks the same sampling
 procedure against the complete seed-1/2 logs and expands to 50 examples if mean error exceeds 10%.
 The completed 30-example design has 2.44% mean validation error; unified human and LLM cost rows
 are stored in `results/benchmark_results_cost_unified.csv`.
+
+## Headline Results
+
+- Hybrid selection ranks first on five datasets, random and uncertainty on two each, and diversity
+  on one; overlapping confidence intervals make several small differences inconclusive.
+- Uncertainty selection reaches 0.755 macro F1 (95% CI 0.742--0.768) on Financial PhraseBank at
+  500 labels; hybrid selection reaches 0.868 (0.852--0.884) on Yelp Polarity at 1,000 labels.
+- At 250 labels, Financial PhraseBank LLM labels are 0.929 accurate but trail the best gold-label
+  strategy by 0.045 macro F1, while Yelp Polarity is 0.003 higher in this comparison.
+- At budget 250, total API cost across all ten datasets is $0.220 for estimated seed 0, $0.215 for
+  measured seed 1, and $0.218 for measured seed 2. API cost excludes review, latency, retries, and
+  quality-control work.
 
 **Measured datasets:** Financial PhraseBank, TREC, Banking77, AG News, SST-2, 20 Newsgroups, Rotten Tomatoes, Yelp Polarity, TweetEval Sentiment, and Emotion.
 
@@ -251,8 +262,8 @@ After a multi-seed LLM run finishes, summarize all completed seeds together:
 ```
 
 For API cost estimates, pass dated token prices explicitly with
-`--input-usd-per-million-tokens` and `--output-usd-per-million-tokens`; otherwise cost columns are
-left as zero-estimate placeholders. The LLM strategy runner uses nested random budgets per
+`--input-usd-per-million-tokens` and `--output-usd-per-million-tokens`. Missing token usage is not
+silently treated as zero cost. The LLM strategy runner uses nested random budgets per
 dataset/seed and resumes from a shared row-level CSV in `results/llm_annotations/` by default, so
 interrupted runs do not re-call the API for examples already written to disk. Pass `--no-resume`
 only when you intentionally want to refresh all annotations.
@@ -264,9 +275,11 @@ row-level token logs:
 python scripts/make_llm_api_cost_summary.py
 ```
 
-This writes `results/llm_api_cost_seed1_2_summary.csv`. The seed-0 LLM strategy run predates the
-complete token-logging schema, so the summary is reported as an auxiliary cost analysis rather
-than as part of the main human-label Pareto frontiers.
+This writes `results/llm_api_cost_seed1_2_summary.csv`. Seed 0 is estimated from the checked-in
+stratified sample, and `scripts/make_llm_cost_estimates.py` combines those estimates with measured
+seed-1/2 usage and the human-cost scenarios in `results/benchmark_results_cost_unified.csv`.
+Figures under `figures/unified_cost/` visually distinguish measured LLM cost, estimated LLM cost,
+and human annotation-cost scenarios.
 
 ## Venue
 
