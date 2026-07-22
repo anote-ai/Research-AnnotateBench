@@ -90,15 +90,43 @@ python scripts/make_statistical_appendix.py \
   --significance-csv results/statistical_significance.csv
 ```
 
-Generate the auxiliary seed-1/2 LLM API cost summary from recorded row-level token logs:
+Generate the seed-1/2 LLM API cost summary from recorded row-level token logs:
 
 ```bash
 python scripts/make_llm_api_cost_summary.py
 ```
 
-This produces `results/llm_api_cost_seed1_2_summary.csv`. The seed-0 LLM strategy run predates the
-complete token-logging schema, so this cost summary is not used for the main human-label Pareto
-frontiers.
+This produces `results/llm_api_cost_seed1_2_summary.csv`. To estimate the missing seed-0 cost from
+a reproducible stratified sample, first generate the manifest, then run only those API calls:
+
+```bash
+python scripts/make_llm_cost_sample_manifest.py \
+  --financial-phrasebank-path data/raw/FinancialPhraseBank-v1.0.zip \
+  --trec-train-path data/raw/trec_train.csv \
+  --trec-test-path data/raw/trec_test.csv \
+  --banking77-train-path data/raw/banking77_train.csv \
+  --banking77-test-path data/raw/banking77_test.csv
+
+OPENAI_API_KEY=... python scripts/run_llm_cost_sample.py \
+  --manifest results/llm_cost_seed0_sample_manifest.csv \
+  --input-usd-per-million-tokens 0.15 \
+  --output-usd-per-million-tokens 0.60
+
+python scripts/make_llm_cost_estimates.py \
+  --financial-phrasebank-path data/raw/FinancialPhraseBank-v1.0.zip \
+  --trec-train-path data/raw/trec_train.csv \
+  --trec-test-path data/raw/trec_test.csv \
+  --banking77-train-path data/raw/banking77_train.csv \
+  --banking77-test-path data/raw/banking77_test.csv
+```
+
+Before an API-backed run, verify the dated prices against the official model page and pass them
+explicitly. Zero-cost placeholders are rejected.
+
+The checked-in run contains 30 complete seed-0 samples per dataset. Retrospective validation on
+the seed-1/2 logs gives 2.44% mean absolute percentage error, so the 50-example fallback was not
+triggered. The resulting unified output is `results/benchmark_results_cost_unified.csv`, and the
+combined plots are under `figures/unified_cost/`.
 
 ## Artifact Contents
 
@@ -109,6 +137,9 @@ frontiers.
 - `scripts/run_llm_annotation.py`: row-level LLM annotation runner.
 - `scripts/run_llm_strategy_benchmark.py`: LLM-as-annotator strategy runner.
 - `scripts/make_llm_api_cost_summary.py`: auxiliary API cost summary from recorded LLM token usage.
+- `scripts/make_llm_cost_sample_manifest.py`: reproducible length-stratified seed-0 sample.
+- `scripts/run_llm_cost_sample.py`: API runner restricted to the saved sample manifest.
+- `scripts/make_llm_cost_estimates.py`: validation, bootstrap intervals, and unified cost results.
 - `scripts/make_statistical_appendix.py`: confidence intervals, agreement, and
   significance tables from row-level annotations.
 - `scripts/validate_benchmark_results.py`: benchmark grid sanity checks.

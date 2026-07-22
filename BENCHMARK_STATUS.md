@@ -2,8 +2,8 @@
 
 ## Completed measured gold-label benchmark
 
-- Scope: 10 public text-classification datasets x 4 selection strategies x 5 label budgets x 3 seeds x 3 cost scenarios.
-- Result grid: `results/benchmark_results.csv` contains 1,800 measured rows.
+- Scope: 10 public text-classification datasets x 4 selection strategies x 5 label budgets x 5 seeds x 3 cost scenarios.
+- Result grid: `results/benchmark_results.csv` contains 3,000 measured rows.
 - Datasets: Financial PhraseBank, TREC, Banking77, AG News, SST-2, 20 Newsgroups, Rotten Tomatoes, Yelp Polarity, TweetEval Sentiment, and Emotion.
 - Strategies: random, uncertainty active learning, diversity active learning, and hybrid active learning.
 - Figures: `figures/learning_curve_*.png` and `figures/pareto_*.png` contain 10 learning curves and 10 Pareto frontiers for the final dataset set.
@@ -25,7 +25,7 @@ Run:
 Current status:
 
 - Benchmark validation passed.
-- Test suite passed with 114 tests.
+- Test suite status is recorded after each release validation run rather than hard-coded here.
 
 ## Downstream model robustness status
 
@@ -59,15 +59,21 @@ Implemented:
   `results/llm_strategy_seed0_1_2_summary.csv` compare those LLM rows against the best matching
   gold-label strategy.
 - `results/llm_api_cost_seed1_2_summary.csv` summarizes recorded seed-1 and seed-2 API token usage
-  and estimated `gpt-4o-mini` cost as an auxiliary analysis. The seed-0 run predates the complete
-  token-logging schema, so LLM rows are still excluded from the main human-label Pareto frontiers.
+  and measured-token `gpt-4o-mini` cost. The checked-in seed-0 sample manifest contains 30
+  length-stratified examples per dataset; running it requires an API key.
+- `results/llm_cost_sampling_validation.csv` verifies the 30-row estimator against complete
+  seed-1/2 logs. Mean absolute percentage error is 2.44%, below the predeclared 10% threshold.
+- `results/benchmark_results_cost_unified.csv` combines the human-cost scenarios, measured
+  seed-1/2 LLM token costs, and seed-0 stratified estimates with bootstrap intervals.
+- `figures/unified_cost/` contains the corresponding combined learning curves and logarithmic
+  cost-performance frontiers.
 - `results/statistical_appendix.csv` and `results/statistical_significance.csv` contain combined
   aggregate diagnostics for the Financial PhraseBank, TREC, and TweetEval Sentiment row-level
   reliability pilots.
 
 Still not claimed as complete:
 
-- Measured API cost frontiers for the full seed-0/1/2 LLM annotator grid.
+- Complete production cost including human review, failed requests, latency, and quality control.
 - Cross-model agreement.
 - Failure-taxonomy coding of real LLM errors.
 - Human adjudication or review-rate optimization.

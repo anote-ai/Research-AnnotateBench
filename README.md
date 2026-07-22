@@ -36,13 +36,17 @@ findings.
 ## Benchmark Grid
 
 The primary measured gold-label benchmark covers 10 public text-classification
-datasets x 4 selection strategies x 5 budget levels x 3 seeds x 3 cost
+datasets x 4 selection strategies x 5 budget levels x 5 seeds x 3 cost
 scenarios. A separate seed-0/1/2 `llm_annotator` extension covers the same 10
 datasets at budgets 50, 100, and 250 by labeling selected training examples
 with an OpenAI model and training the same downstream classifier on those
 model-generated labels. The seed-1 and seed-2 row-level LLM logs also support
 an auxiliary recorded-token API cost estimate in
-`results/llm_api_cost_seed1_2_summary.csv`.
+`results/llm_api_cost_seed1_2_summary.csv`. The seed-0 cost workflow uses a reproducible
+30-example-per-dataset length-stratified sample; its estimator first checks the same sampling
+procedure against the complete seed-1/2 logs and expands to 50 examples if mean error exceeds 10%.
+The completed 30-example design has 2.44% mean validation error; unified human and LLM cost rows
+are stored in `results/benchmark_results_cost_unified.csv`.
 
 **Measured datasets:** Financial PhraseBank, TREC, Banking77, AG News, SST-2, 20 Newsgroups, Rotten Tomatoes, Yelp Polarity, TweetEval Sentiment, and Emotion.
 
@@ -128,7 +132,7 @@ Run the Financial PhraseBank pilot from a local public PhraseBank file:
   --dataset financial_phrasebank \
   --financial-phrasebank-path data/raw/FinancialPhraseBank-v1.0.zip \
   --budgets 50,100,250,500,1000 \
-  --seeds 0,1,2 \
+  --seeds 0,1,2,3,4 \
   --cost-scenarios low,base,high \
   --output-csv results/pilot_results.csv
 ./scripts/make_figures.py --results results/pilot_results.csv --cost-scenario base

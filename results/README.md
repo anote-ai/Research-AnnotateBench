@@ -14,8 +14,8 @@ downstream classifier, and reports selection-strategy learning curves. These are
 classification benchmark outputs, but they are not LLM annotation reliability results.
 
 The row-level `benchmark_results.csv` currently contains the full measured gold-label grid:
-10 datasets x 4 selection strategies x 5 label budgets x 3 seeds x 3 cost scenarios, for
-1,800 rows. The summary files `benchmark_best_overall.csv`, `benchmark_best_by_strategy.csv`,
+10 datasets x 4 selection strategies x 5 label budgets x 5 seeds x 3 cost scenarios, for
+3,000 rows. The summary files `benchmark_best_overall.csv`, `benchmark_best_by_strategy.csv`,
 `budget_recommendations.csv`, and `paper_core_summary.csv` are derived from the same ten-dataset
 benchmark outputs.
 
@@ -31,7 +31,7 @@ against the best matching gold-label strategy from `benchmark_results.csv`.
 
 `llm_api_cost_seed1_2_summary.csv` is an auxiliary API-cost summary derived from recorded row-level
 token usage in local `results/llm_annotations/*seed1.csv` and `*seed2.csv` logs. It uses the
-published `gpt-4o-mini` prices checked on 2024-07-18 ($0.15 per 1M input tokens and $0.60 per
+published `gpt-4o-mini` prices checked on 2026-07-22 ($0.15 per 1M input tokens and $0.60 per
 1M output tokens). The seed-0 LLM strategy run predates the complete token-logging schema, so this
 cost summary is not used to place LLM rows on the main human-label Pareto frontiers.
 
@@ -68,12 +68,22 @@ Current benchmark columns:
 | annotation_cost | estimated label cost |
 | selection_cost | estimated selection overhead |
 | total_cost | estimated total cost |
+| cost_estimation_method | measured, estimated_from_stratified_sample, or human_cost_scenario |
+| cost_sample_size | number of observed rows supporting the cost value |
+| estimated_cost_lower_95 | lower bootstrap bound; equal to total_cost for measured values |
+| estimated_cost_upper_95 | upper bootstrap bound; equal to total_cost for measured values |
 
 LLM strategy outputs use the same core columns and may additionally include `llm_label_accuracy`,
 `llm_label_macro_f1`, `llm_ece`, `llm_lari`, `model_name`, and `prompt_version`. Current
-seed-0/1/2 LLM strategy rows use zero-estimate cost placeholders in the benchmark-style result
-files. Use `llm_api_cost_seed1_2_summary.csv` for the auxiliary recorded-token API cost analysis;
-do not include the LLM rows in the main human-label Pareto frontier.
+legacy seed-0/1/2 LLM strategy rows use zero-estimate cost placeholders in the benchmark-style
+files and must not be used directly for cost comparisons. Use the recorded-token seed-1/2 summary
+and the stratified seed-0 workflow documented in `ARTIFACT.md`; unified outputs explicitly mark
+measured, estimated, and human-cost-scenario values.
+
+`benchmark_results_cost_unified.csv` is the cost-comparison source of truth. It contains the full
+five-seed gold-label grid plus the three-seed LLM grid, with measured seed-1/2 costs and seed-0
+stratified estimates. `llm_cost_sampling_validation.csv` records the retrospective validation;
+the selected 30-example design has 2.44% mean absolute percentage error.
 
 Paper core summary columns:
 
@@ -84,6 +94,8 @@ Paper core summary columns:
 | best_budget | label budget for that strategy-budget point |
 | mean_macro_f1 | mean macro F1 across strategy-selection seeds |
 | std_macro_f1 | sample standard deviation of macro F1 across seeds |
+| ci_lower_95 | lower normal-approximation 95% confidence bound |
+| ci_upper_95 | upper normal-approximation 95% confidence bound |
 | mean_accuracy | mean accuracy across seeds |
 | mean_total_cost | mean estimated cost under the selected cost scenario |
 | n_seeds | number of unique seeds represented |

@@ -58,6 +58,8 @@ def test_make_paper_summary_table_selects_best_base_row(tmp_path):
         "best_budget",
         "mean_macro_f1",
         "std_macro_f1",
+        "ci_lower_95",
+        "ci_upper_95",
         "mean_accuracy",
         "mean_total_cost",
         "n_seeds",

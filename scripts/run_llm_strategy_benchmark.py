@@ -129,6 +129,11 @@ def main() -> None:
         input_usd_per_million_tokens=args.input_usd_per_million_tokens,
         output_usd_per_million_tokens=args.output_usd_per_million_tokens,
     )
+    if not args.dry_run and pricing is None:
+        raise SystemExit(
+            "Positive --input-usd-per-million-tokens and --output-usd-per-million-tokens "
+            "are required for API-backed runs; zero-cost placeholders are not allowed."
+        )
 
     output_path = Path(args.output_csv)
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -238,6 +243,10 @@ def main() -> None:
                                     "annotation_cost": annotation_cost,
                                     "selection_cost": 0.0,
                                     "total_cost": annotation_cost,
+                                    "cost_estimation_method": "measured",
+                                    "cost_sample_size": len(annotations),
+                                    "estimated_cost_lower_95": annotation_cost,
+                                    "estimated_cost_upper_95": annotation_cost,
                                     "llm_label_accuracy": accuracy_score(selected_gold_labels, predicted_labels),
                                     "llm_label_macro_f1": llm_macro_f1,
                                     "llm_ece": expected_calibration_error(confidences, llm_correctness),

@@ -15,7 +15,7 @@ from annotatebench.datasets import BENCHMARK_DATASETS
 
 EXPECTED_STRATEGIES = {"random", "uncertainty_al", "diversity_al", "hybrid_al"}
 EXPECTED_BUDGETS = {50, 100, 250, 500, 1000}
-EXPECTED_SEEDS = {0, 1, 2}
+EXPECTED_SEEDS = {0, 1, 2, 3, 4}
 EXPECTED_COST_SCENARIOS = {"low", "base", "high"}
 
 

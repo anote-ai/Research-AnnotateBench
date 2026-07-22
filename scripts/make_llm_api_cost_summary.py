@@ -4,11 +4,12 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 from collections import defaultdict
 from pathlib import Path
 
 
-DEFAULT_PRICE_SOURCE = "https://openai.com/index/gpt-4o-mini-advancing-cost-efficient-intelligence/"
+DEFAULT_PRICE_SOURCE = "https://developers.openai.com/api/docs/models/gpt-4o-mini"
 
 
 def parse_args() -> argparse.Namespace:
@@ -22,7 +23,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model", default="gpt-4o-mini")
     parser.add_argument("--input-usd-per-million-tokens", type=float, default=0.15)
     parser.add_argument("--output-usd-per-million-tokens", type=float, default=0.60)
-    parser.add_argument("--price-checked-at", default="2024-07-18")
+    parser.add_argument("--price-checked-at", default="2026-07-22")
     parser.add_argument("--price-source-url", default=DEFAULT_PRICE_SOURCE)
     parser.add_argument("--output-csv", default="results/llm_api_cost_seed1_2_summary.csv")
     return parser.parse_args()
@@ -34,6 +35,24 @@ def parse_seeds(raw: str) -> set[int]:
 
 def cost_usd(input_tokens: int, output_tokens: int, input_price: float, output_price: float) -> float:
     return input_tokens * input_price / 1_000_000 + output_tokens * output_price / 1_000_000
+
+
+def token_counts(row: dict[str, str]) -> tuple[int, int, int]:
+    input_tokens = int(float(row.get("input_tokens") or 0))
+    output_tokens = int(float(row.get("output_tokens") or 0))
+    total_tokens = int(float(row.get("total_tokens") or 0))
+    if total_tokens > 0:
+        return input_tokens, output_tokens, total_tokens
+    raw_response = row.get("raw_response") or ""
+    if raw_response:
+        try:
+            usage = json.loads(raw_response).get("usage", {})
+            input_tokens = int(usage.get("prompt_tokens") or 0)
+            output_tokens = int(usage.get("completion_tokens") or 0)
+            total_tokens = int(usage.get("total_tokens") or input_tokens + output_tokens)
+        except (TypeError, ValueError, json.JSONDecodeError):
+            pass
+    return input_tokens, output_tokens, total_tokens
 
 
 def main() -> None:
@@ -67,9 +86,7 @@ def main() -> None:
                 if not dataset:
                     continue
                 key = (dataset, seed)
-                input_tokens = int(float(row.get("input_tokens") or 0))
-                output_tokens = int(float(row.get("output_tokens") or 0))
-                total_tokens = int(float(row.get("total_tokens") or 0))
+                input_tokens, output_tokens, total_tokens = token_counts(row)
                 totals[key]["rows_total"] = int(totals[key]["rows_total"]) + 1
                 if total_tokens > 0:
                     totals[key]["rows_with_recorded_tokens"] = int(totals[key]["rows_with_recorded_tokens"]) + 1
@@ -89,6 +106,10 @@ def main() -> None:
         "input_usd_per_million_tokens",
         "output_usd_per_million_tokens",
         "api_cost_usd",
+        "cost_estimation_method",
+        "cost_sample_size",
+        "estimated_cost_lower_95",
+        "estimated_cost_upper_95",
         "price_checked_at",
         "price_source_url",
     ]
@@ -96,6 +117,12 @@ def main() -> None:
     for (dataset, seed), values in sorted(totals.items()):
         input_tokens = int(values["input_tokens"])
         output_tokens = int(values["output_tokens"])
+        measured_cost = cost_usd(
+            input_tokens,
+            output_tokens,
+            args.input_usd_per_million_tokens,
+            args.output_usd_per_million_tokens,
+        )
         rows.append(
             {
                 "dataset": dataset,
@@ -108,19 +135,18 @@ def main() -> None:
                 "total_tokens": values["total_tokens"],
                 "input_usd_per_million_tokens": args.input_usd_per_million_tokens,
                 "output_usd_per_million_tokens": args.output_usd_per_million_tokens,
-                "api_cost_usd": cost_usd(
-                    input_tokens,
-                    output_tokens,
-                    args.input_usd_per_million_tokens,
-                    args.output_usd_per_million_tokens,
-                ),
+                "api_cost_usd": measured_cost,
+                "cost_estimation_method": "measured",
+                "cost_sample_size": values["rows_with_recorded_tokens"],
+                "estimated_cost_lower_95": measured_cost,
+                "estimated_cost_upper_95": measured_cost,
                 "price_checked_at": args.price_checked_at,
                 "price_source_url": args.price_source_url,
             }
         )
 
     with output_path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer = csv.DictWriter(handle, fieldnames=fieldnames, lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
 

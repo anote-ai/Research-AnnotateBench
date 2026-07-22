@@ -25,7 +25,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--datasets", default=",".join(BENCHMARK_DATASETS))
     parser.add_argument("--budgets", default=",".join(str(budget) for budget in BUDGET_LEVELS))
-    parser.add_argument("--seeds", default="0,1,2")
+    parser.add_argument("--seeds", default="0,1,2,3,4")
     parser.add_argument("--cost-scenarios", default="low,base,high")
     parser.add_argument("--max-train-examples", type=int, default=1200)
     parser.add_argument("--max-test-examples", type=int, default=1000)

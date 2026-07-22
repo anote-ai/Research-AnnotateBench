@@ -53,8 +53,10 @@ def make_figures(
         slug = str(dataset).replace(" ", "_").lower()
         title_context = _title_context(dataset_df)
         summary = (
-            dataset_df
-            .groupby(["strategy", "budget"], as_index=False)
+            dataset_df.assign(
+                cost_estimation_method=dataset_df.get("cost_estimation_method", "human_cost_scenario")
+            )
+            .groupby(["strategy", "budget", "cost_estimation_method"], as_index=False)
             .agg(
                 macro_f1=("macro_f1", "mean"),
                 macro_f1_std=("macro_f1", "std"),
@@ -71,6 +73,8 @@ def _title_context(df: pd.DataFrame) -> str:
     strategies = set(df["strategy"].dropna().astype(str))
     if strategies == {"llm_annotator"}:
         return "LLM annotator seed-0 benchmark"
+    if "llm_annotator" in strategies:
+        return "gold vs. LLM"
     return "gold-label reveal simulation"
 
 
@@ -112,8 +116,18 @@ def _plot_pareto(
     title_context: str,
 ) -> Path:
     fig, ax = plt.subplots(figsize=(7, 4.5))
-    for strategy, strategy_df in df.groupby("strategy"):
-        ax.scatter(strategy_df["total_cost"], strategy_df["macro_f1"], label=strategy, s=36)
+    marker_by_method = {
+        "measured": "o",
+        "estimated_from_stratified_sample": "s",
+        "human_cost_scenario": "^",
+    }
+    for (strategy, method), strategy_df in df.groupby(["strategy", "cost_estimation_method"]):
+        marker = marker_by_method.get(str(method), "o")
+        if strategy == "llm_annotator":
+            label = "LLM estimated" if method == "estimated_from_stratified_sample" else "LLM measured"
+        else:
+            label = str(strategy)
+        ax.scatter(strategy_df["total_cost"], strategy_df["macro_f1"], label=label, s=36, marker=marker)
         for _, row in strategy_df.iterrows():
             ax.annotate(
                 str(int(row["budget"])),
@@ -127,6 +141,9 @@ def _plot_pareto(
     if frontier:
         costs, f1s = zip(*frontier)
         ax.plot(costs, f1s, color="black", linewidth=1.5, label="Pareto frontier")
+    positive_costs = df.loc[df["total_cost"] > 0, "total_cost"]
+    if len(positive_costs) and positive_costs.max() / positive_costs.min() > 100:
+        ax.set_xscale("log")
     ax.set_xlabel("Estimated annotation cost (USD)")
     ax.set_ylabel("Macro F1")
     ax.set_title(f"Cost-performance frontier: {dataset_slug} {title_context}")
