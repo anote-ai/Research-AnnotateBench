@@ -281,12 +281,6 @@ seed-1/2 usage and the human-cost scenarios in `results/benchmark_results_cost_u
 Figures under `figures/unified_cost/` visually distinguish measured LLM cost, estimated LLM cost,
 and human annotation-cost scenarios.
 
-## Venue
-
-**JDSE 2026** draft materials are in `paper/main.tex`. The submission scope is a
-text-classification annotation-strategy benchmark with a seed-0/1/2 LLM annotator extension and
-small row-level reliability pilots. The broader `DESIGN_DOC.md` LLM reliability benchmark remains
-future work.
 
 ## Citation
 
