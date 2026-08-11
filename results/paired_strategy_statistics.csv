@@ -1,0 +1,11 @@
+dataset,top_strategy,top_budget,runner_strategy,runner_budget,paired_mean_difference,bootstrap_ci_lower_95,bootstrap_ci_upper_95,paired_effect_size_dz,exact_sign_flip_p,n_paired_seeds,holm_adjusted_p
+ag_news,hybrid_al,1000,uncertainty_al,1000,0.0032,-0.0112,0.0192,0.1605,0.8125,5,1.0
+banking77,random,1000,hybrid_al,1000,0.0216,0.0153,0.0286,2.5162,0.0625,5,0.625
+emotion,hybrid_al,1000,uncertainty_al,1000,0.021,0.0068,0.0351,1.1811,0.0625,5,0.625
+financial_phrasebank,uncertainty_al,500,hybrid_al,1000,0.0041,-0.0078,0.0167,0.2607,0.625,5,1.0
+rotten_tomatoes,diversity_al,1000,hybrid_al,1000,0.004,-0.0086,0.0144,0.2708,0.5625,5,1.0
+sst2,uncertainty_al,1000,hybrid_al,1000,0.0088,0.0028,0.0148,1.1481,0.0625,5,0.625
+trec,hybrid_al,1000,random,1000,0.0245,0.0138,0.0351,1.7764,0.0625,5,0.625
+tweet_eval_sentiment,hybrid_al,1000,diversity_al,1000,0.0008,-0.0043,0.0061,0.1186,0.6875,5,1.0
+twenty_newsgroups,random,1000,hybrid_al,1000,0.0122,-0.0112,0.0403,0.3623,0.5625,5,1.0
+yelp_polarity,hybrid_al,1000,diversity_al,1000,0.041,0.0282,0.0503,2.7644,0.0625,5,0.625

@@ -1,0 +1,11 @@
+dataset,tfidf_best_strategy,tfidf_best_budget,tfidf_best_macro_f1,embedding_best_strategy,embedding_best_budget,embedding_best_macro_f1,embedding_minus_tfidf_best_macro_f1,best_strategy_agrees,strategy_rank_spearman
+ag_news,hybrid_al,1000,0.793,random,1000,0.854,0.061,False,-0.4
+banking77,random,1000,0.5447,random,1000,0.7407,0.1961,True,0.8
+emotion,hybrid_al,1000,0.2339,hybrid_al,1000,0.4697,0.2358,True,1.0
+financial_phrasebank,uncertainty_al,500,0.7546,diversity_al,1000,0.8472,0.0925,False,-0.4
+rotten_tomatoes,diversity_al,1000,0.689,diversity_al,1000,0.7415,0.0525,True,0.4
+sst2,uncertainty_al,1000,0.7121,hybrid_al,1000,0.801,0.089,False,0.6
+trec,hybrid_al,1000,0.7876,hybrid_al,1000,0.7208,-0.0669,True,0.4
+tweet_eval_sentiment,hybrid_al,1000,0.3597,random,1000,0.5774,0.2177,False,0.2
+twenty_newsgroups,random,1000,0.3481,random,1000,0.6316,0.2834,True,1.0
+yelp_polarity,hybrid_al,1000,0.8677,random,1000,0.852,-0.0157,False,-0.4

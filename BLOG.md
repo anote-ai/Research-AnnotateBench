@@ -7,6 +7,36 @@ AnnotateBench turns that planning choice into a benchmark question: given a fixe
 which annotation strategy produces the best downstream classifier, and where does the
 cost-performance frontier change?
 
+## Expanded Benchmark Update
+
+AnnotateBench now includes four additional analyses for annotation-budget decisions in large data
+pipelines, where the practical bottleneck is often not access to unlabeled data but deciding which
+examples to label, how to value those labels, and how to account for annotation quality and cost:
+
+- A direct positioning comparison with DataPerf, DataComp, and OpenDataVal clarifies that
+  AnnotateBench jointly evaluates label acquisition, human and LLM annotation sources, downstream
+  utility, monetary cost, Pareto efficiency, and reproducibility.
+- A five-seed sentence-embedding sensitivity study finds that the best strategy agrees with the
+  TF-IDF benchmark on 5 of 10 datasets. Strategy rankings therefore depend partly on the downstream
+  representation, not only on the dataset and label budget.
+- A nested acquisition study on Financial PhraseBank, TREC, and Yelp Polarity compares fresh
+  fixed-budget decisions with deployed cumulative trajectories. The winning strategy agrees in 11
+  of 15 dataset-budget comparisons, showing why the two protocols should not be described as the
+  same experiment.
+- An AG News volume study expands the candidate pool from 1,200 to 10,000 examples at a fixed
+  100-label budget. Selection remains practical in this measured range, but diversity and hybrid
+  selection grow more quickly than random or uncertainty selection. These timings are
+  implementation- and machine-specific rather than distributed-systems throughput claims.
+
+The revised paired analysis also supports a more conservative interpretation of strategy wins.
+Across datasets, the top-two mean macro-F1 gaps range from 0.0008 to 0.0410. None of the ten exact
+five-seed sign-flip comparisons remains significant after Holm correction, so the evidence supports
+dataset-specific practical differences rather than a statistically resolved universal winner.
+
+The public result files and scripts used for these analyses are in `results/` and `scripts/`;
+third-party source-dataset text and raw API responses are deliberately excluded from public release
+packages.
+
 ## Key Takeaways
 
 - No annotation strategy wins across every dataset.

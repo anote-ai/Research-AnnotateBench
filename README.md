@@ -72,8 +72,22 @@ The `llm_annotator` strategy instead labels selected training examples with an O
 trains the same downstream classifier on those model-generated labels.
 
 The repository also includes a measured `sentence_transformer_logreg` downstream-model robustness
-check in separate comparison CSVs. These results support the sensitivity analysis, but the primary
-benchmark remains the controlled TF-IDF + logistic-regression setup.
+check completed over the same five seeds as the primary grid. The best strategy agrees between the
+TF-IDF and sentence-embedding representations on 5 of 10 datasets. These results support the
+sensitivity analysis, but the primary benchmark remains the controlled TF-IDF +
+logistic-regression setup.
+
+The expanded analysis also includes:
+
+- paired top-two strategy comparisons with bootstrap intervals, effect sizes, exact sign-flip
+  tests, and Holm correction;
+- nested cumulative acquisition trajectories for Financial PhraseBank, TREC, and Yelp Polarity;
+- an AG News candidate-pool scalability study at 1,200, 5,000, and 10,000 examples.
+
+The corresponding result files are `results/paired_strategy_statistics.csv`,
+`results/cumulative_trajectory_results.csv`, `results/pool_scalability_results.csv`, and the
+downstream-model summary files. The five-seed embedding grid is
+`results/benchmark_results_sentence_transformer_logreg_5seed.csv`.
 
 ## Pareto Analysis
 
