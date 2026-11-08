@@ -5,6 +5,7 @@ import os
 import sys
 
 import pandas as pd
+import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 
@@ -69,3 +70,29 @@ def test_make_paper_summary_table_selects_best_base_row(tmp_path):
     assert summary.loc[0, "best_budget"] == 100
     assert summary.loc[0, "mean_macro_f1"] == 0.7
     assert summary.loc[0, "cost_scenario"] == "base"
+
+
+def test_make_paper_summary_table_uses_student_t_interval(tmp_path):
+    results = tmp_path / "benchmark_results.csv"
+    rows = []
+    for seed, score in enumerate([0.4, 0.5, 0.6, 0.7, 0.8]):
+        rows.append(
+            {
+                "dataset": "fixture",
+                "strategy": "random",
+                "budget": 50,
+                "seed": seed,
+                "macro_f1": score,
+                "accuracy": score,
+                "cost_scenario": "base",
+                "total_cost": 5.0,
+            }
+        )
+    pd.DataFrame(rows).to_csv(results, index=False)
+
+    summary = make_paper_summary_table(results, tmp_path / "summary.csv")
+
+    sample_sd = pd.Series([0.4, 0.5, 0.6, 0.7, 0.8]).std()
+    expected_half_width = 2.7764451051977987 * sample_sd / (5**0.5)
+    assert summary.loc[0, "ci_lower_95"] == pytest.approx(round(0.6 - expected_half_width, 4))
+    assert summary.loc[0, "ci_upper_95"] == pytest.approx(round(0.6 + expected_half_width, 4))

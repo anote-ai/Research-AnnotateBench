@@ -25,6 +25,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--results", default="results/benchmark_results.csv")
     parser.add_argument("--figures-dir", default="figures")
     parser.add_argument("--cost-scenario", default="base")
+    parser.add_argument("--llm-review-fraction", type=float, default=0.0)
+    parser.add_argument("--human-review-cost-per-label", type=float, default=0.0952)
     return parser.parse_args()
 
 
@@ -32,6 +34,8 @@ def make_figures(
     results_csv: str | Path,
     figures_dir: str | Path,
     cost_scenario: str = "base",
+    llm_review_fraction: float = 0.0,
+    human_review_cost_per_label: float = 0.0952,
 ) -> list[Path]:
     results_path = Path(results_csv)
     output_dir = Path(figures_dir)
@@ -64,9 +68,40 @@ def make_figures(
             )
         )
         summary["macro_f1_std"] = summary["macro_f1_std"].fillna(0.0)
+        summary = add_review_cost_sensitivity(
+            summary,
+            review_fraction=llm_review_fraction,
+            human_cost_per_label=human_review_cost_per_label,
+        )
         written.append(_plot_learning_curve(summary, slug, output_dir, title_context))
         written.append(_plot_pareto(summary, slug, output_dir, title_context))
     return written
+
+
+def add_review_cost_sensitivity(
+    summary: pd.DataFrame,
+    *,
+    review_fraction: float,
+    human_cost_per_label: float,
+) -> pd.DataFrame:
+    if not 0.0 <= review_fraction <= 1.0:
+        raise ValueError("review_fraction must be in [0, 1].")
+    if human_cost_per_label < 0:
+        raise ValueError("human_cost_per_label must be non-negative.")
+    output = summary.copy()
+    output["frontier_eligible"] = True
+    if review_fraction == 0 or "llm_annotator" not in set(output["strategy"]):
+        return output
+    llm_mask = output["strategy"] == "llm_annotator"
+    output.loc[llm_mask, "frontier_eligible"] = False
+    reviewed = output[llm_mask].copy()
+    reviewed["strategy"] = f"llm_annotator_review_{int(review_fraction * 100)}pct"
+    reviewed["cost_estimation_method"] = "review_sensitivity"
+    reviewed["total_cost"] = reviewed["total_cost"] + (
+        reviewed["budget"] * review_fraction * human_cost_per_label
+    )
+    reviewed["frontier_eligible"] = True
+    return pd.concat([output, reviewed], ignore_index=True)
 
 
 def _title_context(df: pd.DataFrame) -> str:
@@ -120,11 +155,16 @@ def _plot_pareto(
         "measured": "o",
         "estimated_from_stratified_sample": "s",
         "human_cost_scenario": "^",
+        "review_sensitivity": "D",
     }
     for (strategy, method), strategy_df in df.groupby(["strategy", "cost_estimation_method"]):
         marker = marker_by_method.get(str(method), "o")
         if strategy == "llm_annotator":
             label = "LLM estimated" if method == "estimated_from_stratified_sample" else "LLM measured"
+            if "frontier_eligible" in strategy_df and not strategy_df["frontier_eligible"].any():
+                label += " (API only)"
+        elif strategy == "llm_annotator_review_10pct":
+            label = "LLM + 10% human review"
         else:
             label = str(strategy)
         ax.scatter(strategy_df["total_cost"], strategy_df["macro_f1"], label=label, s=36, marker=marker)
@@ -137,7 +177,8 @@ def _plot_pareto(
                 fontsize=7,
             )
 
-    frontier = pareto_frontier(list(zip(df["total_cost"], df["macro_f1"])))
+    frontier_frame = df[df.get("frontier_eligible", True)]
+    frontier = pareto_frontier(list(zip(frontier_frame["total_cost"], frontier_frame["macro_f1"])))
     if frontier:
         costs, f1s = zip(*frontier)
         ax.plot(costs, f1s, color="black", linewidth=1.5, label="Pareto frontier")
@@ -159,7 +200,13 @@ def _plot_pareto(
 
 def main() -> None:
     args = parse_args()
-    written = make_figures(args.results, args.figures_dir, args.cost_scenario)
+    written = make_figures(
+        args.results,
+        args.figures_dir,
+        args.cost_scenario,
+        args.llm_review_fraction,
+        args.human_review_cost_per_label,
+    )
     print("Wrote figures:")
     for path in written:
         print(f"  {path}")
