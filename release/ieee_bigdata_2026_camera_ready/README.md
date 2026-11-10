@@ -64,23 +64,23 @@ From the repository root:
 .venv/bin/python scripts/validate_benchmark_results.py \
   --results results/benchmark_results.csv
 
-.venv/bin/python scripts/make_ieee_robustness_summary.py \
+.venv/bin/python scripts/make_downstream_model_robustness_summary.py \
   --baseline-results results/benchmark_results.csv \
   --embedding-results \
     results/benchmark_results_sentence_transformer_logreg_5seed.csv \
-  --output-csv results/ieee_downstream_model_robustness.csv
+  --output-csv results/downstream_model_robustness_summary.csv
 
-.venv/bin/python scripts/make_ieee_paired_strategy_stats.py \
+.venv/bin/python scripts/make_paired_strategy_stats.py \
   --results results/benchmark_results.csv \
-  --output-csv results/ieee_paired_strategy_statistics.csv
+  --output-csv results/paired_strategy_statistics.csv
 
-.venv/bin/python scripts/run_ieee_cumulative_trajectories.py \
+.venv/bin/python scripts/run_cumulative_trajectories.py \
   --financial-phrasebank-path data/raw/FinancialPhraseBank-v1.0.zip \
   --trec-train-path data/raw/trec_train.csv \
   --trec-test-path data/raw/trec_test.csv \
   --download-data
 
-.venv/bin/python scripts/run_ieee_pool_scalability.py
+.venv/bin/python scripts/run_pool_scalability.py
 
 .venv/bin/python -m pytest -q
 ```

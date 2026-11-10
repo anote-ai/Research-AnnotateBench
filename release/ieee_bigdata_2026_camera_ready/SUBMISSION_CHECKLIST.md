@@ -11,7 +11,7 @@
 - [x] PDF is US letter, two-column, searchable, and has all fonts embedded
 - [x] No undefined references, missing citations, serious overfull boxes,
       passwords, attachments, crop marks, or non-template page numbers
-- [x] Uploaded PDF downloaded from CyberChair and matched to the local final
+- [ ] Camera-ready uploaded PDF downloaded from CyberChair and matched to the local final
       PDF by SHA-256
 
 ## Evidence and reproducibility
@@ -29,7 +29,7 @@
 - [x] Dataset citations are included for all ten datasets
 - [x] No unsupported preregistration or predeclaration claim remains
 - [x] `scripts/validate_benchmark_results.py` passes
-- [x] Full project test suite passes
+- [ ] Full project test suite passes in the current environment (collection previously crashed)
 - [x] Sentence-transformer seeds 3 and 4 complete for all ten datasets
 - [x] Five-seed downstream-model summary passes its completeness check
 - [x] Three-dataset cumulative grid contains 300 complete, unique records
@@ -55,14 +55,14 @@ Do not infer or silently fill any of these fields.
 - [ ] Registration and travel responsibility confirmed
 - [ ] Funding acknowledgements and grant numbers confirmed
 - [ ] Conflicts of interest entered in the submission system
-- [x] All authors approve the final PDF
+- [ ] All authors approve the revised camera-ready PDF
 - [x] All authors confirm that there is no simultaneous archival submission
 - [ ] All authors agree to the in-person presentation arrangement in Phoenix
 
 ## Dates and submission gate
 
-- Internal upload target: **August 20, 2026, Tokyo time**
-- Official deadline: **August 21, 2026**
+- Original submission target (historical): **August 20, 2026, Tokyo time**
+- Original submission deadline (historical): **August 21, 2026**
 - Notification: **October 24, 2026**
 - Camera-ready: **November 14, 2026**
 - Conference: **December 14--17, 2026, Phoenix**

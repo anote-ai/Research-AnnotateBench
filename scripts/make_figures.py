@@ -166,7 +166,7 @@ def _plot_pareto(
         elif strategy == "llm_annotator_review_10pct":
             label = "LLM + 10% human review"
         else:
-            label = str(strategy)
+            label = {"random": "Random", "uncertainty_al": "Uncertainty", "diversity_al": "Diversity", "hybrid_al": "Hybrid"}.get(str(strategy), str(strategy))
         ax.scatter(strategy_df["total_cost"], strategy_df["macro_f1"], label=label, s=36, marker=marker)
         for _, row in strategy_df.iterrows():
             ax.annotate(
@@ -187,7 +187,8 @@ def _plot_pareto(
         ax.set_xscale("log")
     ax.set_xlabel("Estimated annotation cost (USD)")
     ax.set_ylabel("Macro F1")
-    ax.set_title(f"Cost-performance frontier: {dataset_slug} {title_context}")
+    dataset_name = "Financial PhraseBank" if dataset_slug == "financial_phrasebank" else dataset_slug.replace("_", " ").title()
+    ax.set_title(f"Cost-performance frontier: {dataset_name} {title_context}")
     ax.set_ylim(0, 1)
     ax.grid(True, alpha=0.25)
     ax.legend(fontsize=8)

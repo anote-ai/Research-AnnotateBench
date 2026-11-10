@@ -4,10 +4,10 @@ This matrix maps every actionable review point to the camera-ready manuscript or
 
 | Reviewer | Comment | Resolution | Evidence |
 |---|---|---|---|
-| 1, 3 | Table VI mixes annotation source, example selection, and best-result selection | Added a gold classifier on the identical LLM-selected examples and retained best selector only as a separate retrospective reference | `main.tex`, Table VI; `results/camera_ready/llm_matched_gold_*.csv` |
+| 1, 3 | Table VII mixes annotation source, example selection, and best-result selection | Reused same-seed random gold results after verifying deterministic budget-250 index matching and retained best selector only as a separate retrospective reference | `main.tex`, Table VII; `results/camera_ready/llm_matched_gold_*.csv` |
 | 1, 3 | “Class-covering” uncertainty seed conflicts with code | Replaced with the exact random seed size, budget accounting, single-batch entropy selection, and random fallback | `main.tex`, Section III-B |
-| 1 | Table V changes only the downstream representation | Renamed as downstream-model sensitivity and stated that acquisition remains in TF-IDF space | `main.tex`, Section V-D and Table V caption |
-| 1, 3 | Three-seed LLM spread is hidden | Table VI reports paired-gap mean and sample SD | `main.tex`, Table VI |
+| 1 | Table V changes only the downstream representation | Renamed as downstream-model sensitivity and stated that acquisition remains in TF-IDF space | `main.tex`, Section V-D and Table VII caption |
+| 1, 3 | Three-seed LLM spread is hidden | Table VII reports paired-gap mean and sample SD | `main.tex`, Table VII |
 | 1, 3 | Five-seed intervals use a normal critical value | Recomputed with Student-t, df=4; top-two overlap is now 7/10 | `results/camera_ready/paper_core_summary_t.csv`; `top_two_interval_overlap.csv` |
 | 1, 3 | Cost conclusions may depend on modeled overhead | Audited 1x, 2x, 5x, and 10x overhead; all ten frontiers are stable | `results/camera_ready/selection_overhead_sensitivity.csv` |
 | 1 | Add modest LLM review cost | Added 10% review at $0.0952 per item as a cost-only sensitivity | `main.tex`, Fig. 3 and Section V-E |
@@ -24,6 +24,6 @@ This matrix maps every actionable review point to the camera-ready manuscript or
 ## Completed release gates
 
 - Replaced the one selected FPB seed-1 dry-run row with a production response from `gpt-4o-mini-2024-07-18`.
-- Regenerated the FPB LLM rows, matched-gold summaries, and Table VI.
+- Regenerated the FPB LLM rows, matched-gold summaries, and Table VII.
 - Cited result-generating commit `a4d29d0` in the manuscript.
-- Verified the analysis regressions and compiled the six-page camera-ready PDF.
+- Verified the analysis regressions and compiled the camera-ready PDF (now seven pages after the November 10 claim audit).
