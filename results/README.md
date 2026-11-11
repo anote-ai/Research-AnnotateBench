@@ -126,8 +126,8 @@ Paper core summary columns:
 | best_budget | label budget for that strategy-budget point |
 | mean_macro_f1 | mean macro F1 across strategy-selection seeds |
 | std_macro_f1 | sample standard deviation of macro F1 across seeds |
-| ci_lower_95 | lower normal-approximation 95% confidence bound |
-| ci_upper_95 | upper normal-approximation 95% confidence bound |
+| ci_lower_95 | lower two-sided 95% Student-t confidence bound over seeds |
+| ci_upper_95 | upper two-sided 95% Student-t confidence bound over seeds |
 | mean_accuracy | mean accuracy across seeds |
 | mean_total_cost | mean estimated cost under the selected cost scenario |
 | n_seeds | number of unique seeds represented |

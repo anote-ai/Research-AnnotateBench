@@ -1,0 +1,11 @@
+dataset,best_strategy,best_budget,mean_macro_f1,std_macro_f1,ci_lower_95,ci_upper_95,mean_accuracy,mean_total_cost,n_seeds,cost_scenario
+ag_news,hybrid_al,1000,0.793,0.0091,0.7816,0.8043,0.7924,99.2,5,base
+banking77,random,1000,0.5447,0.0067,0.5363,0.5531,0.571,95.2,5,base
+emotion,hybrid_al,1000,0.2339,0.0053,0.2273,0.2405,0.5052,99.2,5,base
+financial_phrasebank,uncertainty_al,500,0.7546,0.0149,0.7362,0.7731,0.83,48.6,5,base
+rotten_tomatoes,diversity_al,1000,0.689,0.0103,0.6762,0.7018,0.6892,98.2,5,base
+sst2,uncertainty_al,1000,0.7121,0.012,0.6972,0.727,0.7144,97.2,5,base
+trec,hybrid_al,1000,0.7876,0.0031,0.7838,0.7915,0.7968,99.2,5,base
+tweet_eval_sentiment,hybrid_al,1000,0.3597,0.0066,0.3515,0.3678,0.479,99.2,5,base
+twenty_newsgroups,random,1000,0.3481,0.0331,0.307,0.3893,0.3982,95.2,5,base
+yelp_polarity,hybrid_al,1000,0.8677,0.0181,0.8452,0.8903,0.868,99.2,5,base

@@ -1,0 +1,3 @@
+dataset_name,seed,example_id,gold_label,predicted_label,confidence,model_name,temperature,prompt_version,notes
+banking77,1,banking77_train_722,getting_spare_card,Refund_not_showing_up,0.0,gpt-4o-mini,0,text_classification_v1_zero_shot_json,invalid_annotation: Unsupported predicted_label: 'get_spare_card'
+banking77,2,banking77_train_585,getting_spare_card,Refund_not_showing_up,0.0,gpt-4o-mini,0,text_classification_v1_zero_shot_json,invalid_annotation: Unsupported predicted_label: 'getting_physical_card'
